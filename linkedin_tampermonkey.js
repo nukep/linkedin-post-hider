@@ -37,6 +37,10 @@ function regexFromLiteralWord(word) {
     return regex;
 }
 
+function runFilterOnUrl(url) {
+    return !url.includes('/feed/update/');
+}
+
 (function() {
     'use strict';
 
@@ -127,6 +131,8 @@ function regexFromLiteralWord(word) {
 
         const dialog = document.createElement('div');
         dialog.id = 'linkedin-filter-settings';
+
+        // TODO - Make this Claude-generated mess nicer. Use CSS classes if possible?
         dialog.innerHTML = `
             <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
                         background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
@@ -204,6 +210,7 @@ function regexFromLiteralWord(word) {
         });
 
         // Close on overlay click
+        // TODO - Fix this horrible thing that Claude made. Selecting by the background color? What???
         dialog.querySelector('div[style*="rgba(0,0,0,0.5)"]').addEventListener('click', () => {
             dialog.remove();
         });
@@ -221,22 +228,31 @@ function regexFromLiteralWord(word) {
 
     // Watch for dynamically loaded articles
     const observer = new MutationObserver((mutations) => {
+        // Only run if we're on a page that allows changes
+        if (!runFilterOnUrl(window.location.href)) {
+            return;
+        }
+
         let shouldFilter = false;
 
         for (const mutation of mutations) {
             for (const node of mutation.addedNodes) {
+                // TODO - replace hard-coded number
                 if (node.nodeType === 1) {
                     if (node.matches && node.matches('[role="article"]')) {
                         shouldFilter = true;
                         break;
                     }
+                    // TODO - Claude generated this. Do we need it?
                     if (node.querySelectorAll && node.querySelectorAll('[role="article"]').length > 0) {
                         shouldFilter = true;
                         break;
                     }
                 }
             }
-            if (shouldFilter) break;
+            if (shouldFilter) {
+                break;
+            }
         }
 
         if (shouldFilter) {
