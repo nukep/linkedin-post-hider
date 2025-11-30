@@ -2,7 +2,7 @@
 // @name         Remove LinkedIn Posts
 // @namespace    http://tampermonkey.net/
 // @version      2025-11-30
-// @description  Remove articles matching regex patterns
+// @description  Remove LinkedIn posts and other elements matching regex patterns
 // @author       Danny Spencer, Claude Sonnet 4.5
 // @match        https://www.linkedin.com/*
 // @grant        GM_getValue
@@ -19,12 +19,41 @@
 // Feedback and any new revisions to make it not suck are welcome!
 
 
-function getLinkedInArticleText(article) {
-    const elem = article.querySelector('.break-words');
-    if (!elem) {
-        return '';
+function isElementArticle(element) {
+    return element.matches('[role="article"]');
+}
+
+function isElementNews(element) {
+    return element.matches('.news-module__storyline');
+}
+
+function isElementAMatch(element) {
+    return isElementArticle(element) || isElementNews(element);
+}
+
+function queryAllElements(root=null) {
+    if (!root) {
+        root = document;
     }
-    return elem.innerText;
+    return root.querySelectorAll('[role="article"],.news-module__storyline');
+}
+
+
+function getElementText(element) {
+    if (isElementNews(element)) {
+        // LinkedIn News
+        return element.innerText;
+    }
+    if (isElementArticle(element)) {
+        // Article
+        const elem = element.querySelector('.break-words');
+        if (!elem) {
+            return '';
+        }
+        return elem.innerText;
+    }
+
+    return '';
 }
 
 function escapeRegex(str) {
@@ -46,7 +75,7 @@ function runFilterOnUrl(url) {
 
     // Default settings
     const DEFAULT_SETTINGS = {
-        regexList: ['/\\bAI\\b/i'],
+        regexList: [],
         debugMode: false
     };
 
@@ -80,7 +109,7 @@ function runFilterOnUrl(url) {
 
     // Function to check if element should be removed
     function shouldRemove(element) {
-        const text = getLinkedInArticleText(element);
+        const text = getElementText(element);
         for (const regex of compiledRegexList) {
             if (regex.test(text)) {
                 return true;
@@ -90,26 +119,29 @@ function runFilterOnUrl(url) {
     }
 
     // Function to remove matching articles
-    function filterArticles() {
-        const articles = document.querySelectorAll('[role="article"]');
+    function filterElements() {
+        const elements = queryAllElements();
         let processed = 0;
 
-        articles.forEach(article => {
-            if (shouldRemove(article)) {
+        elements.forEach(element => {
+            if (shouldRemove(element)) {
                 if (settings.debugMode) {
                     // Debug mode: highlight the element
-                    if (!article.dataset.filtered) {
+                    if (!element.dataset.filtered) {
                         const highlightNode = document.createElement('div');
-                        highlightNode.textContent = 'Filtered!';
+                        highlightNode.textContent = 'Matched';
                         highlightNode.style.backgroundColor = '#ff00ff';
                         highlightNode.style.textAlign = 'center';
-                        article.prepend(highlightNode);
-                        article.dataset.filtered = 'true';
+                        element.prepend(highlightNode);
+
+                        element.style.setProperty('border', '#f0f 5px solid', 'important');
+
+                        element.dataset.filtered = 'true';
                         processed++;
                     }
                 } else {
                     // Normal mode: remove the element
-                    article.remove();
+                    element.remove();
                     processed++;
                 }
             }
@@ -117,7 +149,7 @@ function runFilterOnUrl(url) {
 
         if (processed > 0) {
             const action = settings.debugMode ? 'Highlighted' : 'Removed';
-            console.log(`[Article Filter] ${action} ${processed} article(s)`);
+            console.log(`[LinkedIn Element Filter] ${action} ${processed} elements(s)`);
         }
     }
 
@@ -146,9 +178,9 @@ function runFilterOnUrl(url) {
                     <textarea id="regex-input" style="width: 100%; height: 150px; padding: 10px;
                               border: 1px solid #ccc; border-radius: 4px; font-family: monospace;
                               font-size: 13px; box-sizing: border-box; resize: vertical;"
-                              placeholder="/\\bAI\\b/i&#10;/crypto/i&#10;hustle">${settings.regexList.join('\n')}</textarea>
+                              placeholder="AI&#10;/\\bsynerg(y|ize|ise)/i&#10;hustle&#10;hack:">${settings.regexList.join('\n')}</textarea>
                     <small style="color: #666; display: block; margin-top: 5px;">
-                        Use /pattern/flags format (e.g., /\\bAI\\b/i) or plain text
+                        Use /pattern/flags format (e.g., /\\bfoo.*?bar\\b/i) or plain text
                     </small>
                 </div>
 
@@ -201,7 +233,7 @@ function runFilterOnUrl(url) {
             saveSettings(settings);
             compiledRegexList = parseRegexList(settings.regexList);
 
-            console.log('[Article Filter] Settings saved:', settings);
+            console.log('[LinkedIn Element Filter] Settings saved:', settings);
 
             dialog.remove();
 
@@ -221,9 +253,9 @@ function runFilterOnUrl(url) {
 
     // Run filter when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', filterArticles);
+        document.addEventListener('DOMContentLoaded', filterElements);
     } else {
-        filterArticles();
+        filterElements();
     }
 
     // Watch for dynamically loaded articles
@@ -239,12 +271,7 @@ function runFilterOnUrl(url) {
             for (const node of mutation.addedNodes) {
                 // TODO - replace hard-coded number
                 if (node.nodeType === 1) {
-                    if (node.matches && node.matches('[role="article"]')) {
-                        shouldFilter = true;
-                        break;
-                    }
-                    // TODO - Claude generated this. Do we need it?
-                    if (node.querySelectorAll && node.querySelectorAll('[role="article"]').length > 0) {
+                    if (isElementAMatch(node)) {
                         shouldFilter = true;
                         break;
                     }
@@ -256,7 +283,7 @@ function runFilterOnUrl(url) {
         }
 
         if (shouldFilter) {
-            filterArticles();
+            filterElements();
         }
     });
 
@@ -267,5 +294,5 @@ function runFilterOnUrl(url) {
     });
 
     // Also run periodically as backup
-    setInterval(filterArticles, 2000);
+    //setInterval(filterElements, 2000);
 })();
