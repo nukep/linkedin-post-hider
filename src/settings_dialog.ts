@@ -254,15 +254,15 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
         checked: settings.hideContentCredentials
     })
 
-    const [debug_mode_section, get_debug_mode] = createCheckBoxSection({
-        labelText: 'Debug Mode',
+    const [highlight_mode_section, get_highlight_mode] = createCheckBoxSection({
+        labelText: 'Highlight Mode',
         hintText: 'Highlights posts instead of removing them',
-        checked: settings.debugMode
+        checked: settings.highlightMode
     })
 
     sections.appendChild(regex_input_section);
     sections.appendChild(hide_content_credentials);
-    sections.appendChild(debug_mode_section);
+    sections.appendChild(highlight_mode_section);
 
     const save_btn_elem         = wrapper.querySelector('#save-btn')!;
     const cancel_btn_elem       = wrapper.querySelector('#cancel-btn')!;
@@ -280,7 +280,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
     save_btn_elem.addEventListener('click', () => {
         const regexInput = get_regex_text();
         const hideContentCredentials = get_hide_content_credentials();
-        const debugMode = get_debug_mode();
+        const highlightMode = get_highlight_mode();
 
         // Parse regex list
         const regexList = regexInput
@@ -289,7 +289,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
             .filter(line => line.length > 0);
 
         // Apply settings
-        applySettings({ regexList, hideContentCredentials, debugMode });
+        applySettings({ regexList, hideContentCredentials, highlightMode });
 
         host.remove();
     });

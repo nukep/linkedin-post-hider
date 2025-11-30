@@ -92,13 +92,12 @@ function filterElements() {
     let processed = 0;
 
     const settings = loadSettings();
-    const debugMode = settings.debugMode;
+    const highlightMode = settings.highlightMode;
     const regexList = getRegexList();
 
     elements.forEach(element => {
         if (shouldRemove(element, settings, regexList)) {
-            if (debugMode) {
-                // Debug mode: highlight the element
+            if (highlightMode) {
                 if (!element.dataset.filtered) {
                     const highlightNode = document.createElement('div');
                     highlightNode.textContent = 'Matched';
@@ -120,7 +119,7 @@ function filterElements() {
     });
 
     if (processed > 0) {
-        const action = debugMode ? 'Highlighted' : 'Removed';
+        const action = highlightMode ? 'Highlighted' : 'Removed';
         console.log(`[LinkedIn Element Filter] ${action} ${processed} elements(s)`);
     }
 }

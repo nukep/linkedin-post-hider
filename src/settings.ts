@@ -3,7 +3,7 @@
 const DEFAULT_SETTINGS : Settings = {
     regexList: [],
     hideContentCredentials: false,
-    debugMode: false,
+    highlightMode: false,
 };
 
 // Load settings from storage
