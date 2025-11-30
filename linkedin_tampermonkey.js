@@ -151,12 +151,74 @@
         }
     }
 
+    function createTextAreaSection({
+        labelText,
+        placeholderText,
+        hintText,
+        text
+    }) {
+        const section = document.createElement('div');
+        section.className = '_nospam_ext_section';
+
+        const label = document.createElement('label');
+        label.className = '_nospam_ext_label';
+        label.textContent = labelText;
+
+        const textarea = document.createElement('textarea');
+        textarea.className = '_nospam_ext_textarea';
+        textarea.placeholder = placeholderText;
+        textarea.textContent = text;
+
+        const hint = document.createElement('small');
+        hint.className = '_nospam_ext_hint';
+        hint.textContent = hintText;
+
+        section.appendChild(label);
+        section.appendChild(textarea);
+        section.appendChild(hint);
+
+        const getValue = () => {
+            return textarea.value;
+        };
+
+        return [section, getValue];
+    }
+
+    function createCheckBoxSection({
+        checked = false,
+        labelText
+    }) {
+        const section = document.createElement('div');
+        section.className = '_nospam_ext_section';
+
+        const label = document.createElement('label');
+        label.className = '_nospam_ext_checkbox_label';
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.className = '_nospam_ext_checkbox';
+        input.checked = checked;
+
+        const span = document.createElement('span');
+        span.className = '_nospam_ext_checkbox_text';
+        span.textContent = labelText;
+
+        label.appendChild(input);
+        label.appendChild(span);
+        section.appendChild(label);
+
+        const getValue = () => {
+            return input.checked;
+        };
+
+        return [section, getValue];
+    }
+
     // Create settings UI
     function createDialogShadowDom() {
         // Create host element
         const host = document.createElement('div');
         host.id = 'linkedin-filter-shadow-host';
-        document.body.appendChild(host);
 
         // Attach shadow DOM
         const shadow = host.attachShadow({ mode: 'open' });
@@ -282,39 +344,41 @@
     <div class="_nospam_ext_modal">
         <h2 class="_nospam_ext_title">LinkedIn Post Filter Settings</h2>
 
-        <div class="_nospam_ext_section">
-            <label class="_nospam_ext_label">Filter Patterns (one per line):</label>
-            <textarea id="regex-input" class="_nospam_ext_textarea" placeholder="AI&#10;/\\bsynerg(y|ize|ise)/i&#10;hustle&#10;hack:"></textarea>
-            <small class="_nospam_ext_hint">
-                Use /pattern/flags format (e.g., /\\bfoo.*?bar\\b/i) or plain text
-            </small>
-        </div>
-
-        <div class="_nospam_ext_section">
-            <label class="_nospam_ext_checkbox_label">
-                <input type="checkbox" id="debug-mode" class="_nospam_ext_checkbox">
-                <span class="_nospam_ext_checkbox_text">Debug Mode (highlight instead of remove)</span>
-            </label>
-        </div>
+        <div id="sections"></div>
 
         <div class="_nospam_ext_button_row">
             <button id="cancel-btn" class="_nospam_ext_btn_cancel">Cancel</button>
             <button id="save-btn" class="_nospam_ext_btn_save">Save & Apply</button>
         </div>
+
     </div>
 
     <div class="_nospam_ext_overlay" id="modal-bg-overlay"></div>
 `;
 
-        const regex_input_elem      = wrapper.querySelector('#regex-input');
-        const debug_mode_elem       = wrapper.querySelector('#debug-mode');
+        // Insert CSS + HTML into shadow
+        shadow.append(style, wrapper);
+
+        const sections = wrapper.querySelector('#sections');
+
+        const [regex_input_section, get_regex_text] = createTextAreaSection({
+            labelText: 'Filter Patterns (one per line):',
+            placeholderText: 'AI\n/\\bsynerg(y|ize|ise)/i\nhustle\nhack:',
+            hintText: 'Use /pattern/flags format (e.g., /\\bfoo.*?bar\\b/i) or plain text',
+            text: settings.regexList.join('\n')
+        })
+
+        const [debug_mode_section, get_debug_mode] = createCheckBoxSection({
+            labelText: 'Debug Mode (highlight instead of remove)',
+            checked: settings.debugMode
+        })
+
+        sections.appendChild(regex_input_section);
+        sections.appendChild(debug_mode_section);
+
         const save_btn_elem         = wrapper.querySelector('#save-btn');
         const cancel_btn_elem       = wrapper.querySelector('#cancel-btn');
         const model_bg_overlay_elem = wrapper.querySelector('#modal-bg-overlay');
-
-        regex_input_elem.textContent = settings.regexList.join('\n');
-
-        debug_mode_elem.checked = settings.debugMode;
 
         // Remove the dialog on cancel or overlay click
 
@@ -326,8 +390,8 @@
         });
 
         save_btn_elem.addEventListener('click', () => {
-            const regexInput = regex_input_elem.value;
-            const debugMode = debug_mode_elem.checked;
+            const regexInput = get_regex_text();
+            const debugMode = get_debug_mode();
 
             // Parse regex list
             const regexList = regexInput
