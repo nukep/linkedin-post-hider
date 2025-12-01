@@ -10,6 +10,10 @@ export function isElementAMatch(element: Element): boolean {
     return isElementPost(element) || isElementNews(element);
 }
 
+export function doesElementContainContentCredentials(element: Element): boolean {
+    return element.querySelectorAll('#content-credentials').length > 0;
+}
+
 export function queryAllElements(root: HTMLElement | null = null): NodeListOf<HTMLElement> {
     if (!root) {
         root = window.document.body;

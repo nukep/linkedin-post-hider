@@ -48,7 +48,13 @@ function buildGetRegexList() {
 const getRegexList = buildGetRegexList();
 
 // Function to check if element should be removed
-function shouldRemove(element) {
+function shouldRemove(element, settings: Settings) {
+    if (settings.hideContentCredentials) {
+        if (DomUtils.doesElementContainContentCredentials(element)) {
+            return true;
+        }
+    }
+
     const text = DomUtils.getElementText(element);
     for (const regex of getRegexList()) {
         if (regex.test(text)) {
@@ -63,10 +69,11 @@ function filterElements() {
     const elements = DomUtils.queryAllElements();
     let processed = 0;
 
-    const debugMode = loadSettings().debugMode;
+    const settings = loadSettings();
+    const debugMode = settings.debugMode;
 
     elements.forEach(element => {
-        if (shouldRemove(element)) {
+        if (shouldRemove(element, settings)) {
             if (debugMode) {
                 // Debug mode: highlight the element
                 if (!element.dataset.filtered) {

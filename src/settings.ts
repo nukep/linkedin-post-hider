@@ -2,18 +2,22 @@
 // Default settings
 const DEFAULT_SETTINGS : Settings = {
     regexList: [],
-    debugMode: false
+    hideContentCredentials: false,
+    debugMode: false,
 };
 
 // Load settings from storage
 export function loadSettings(): Settings {
-    const regexList = GM_getValue('regexList', DEFAULT_SETTINGS.regexList);
-    const debugMode = GM_getValue('debugMode', DEFAULT_SETTINGS.debugMode);
-    return { regexList, debugMode };
+    let settings = {};
+    for (const key of Object.keys(DEFAULT_SETTINGS)) {
+        settings[key] = GM_getValue(key, DEFAULT_SETTINGS[key]);
+    }
+    return settings as Settings;
 }
 
 // Save settings to storage
 export function saveSettings(settings: Settings) {
-    GM_setValue('regexList', settings.regexList);
-    GM_setValue('debugMode', settings.debugMode);
+    for (const key of Object.keys(settings)) {
+        GM_setValue(key, settings[key]);
+    }
 }

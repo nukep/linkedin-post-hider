@@ -8,6 +8,7 @@ interface TextAreaSectionParams {
 interface CheckBoxSectionParams {
     checked: boolean;
     labelText: string;
+    hintText: string;
 }
 
 interface DialogParams {
@@ -49,8 +50,9 @@ function createTextAreaSection({
 }
 
 function createCheckBoxSection({
-    checked = false,
-    labelText
+    checked,
+    labelText,
+    hintText
 }: CheckBoxSectionParams): [HTMLElement, () => boolean] {
     const section = document.createElement('div');
     section.className = '_nospam_ext_section';
@@ -67,9 +69,14 @@ function createCheckBoxSection({
     span.className = '_nospam_ext_checkbox_text';
     span.textContent = labelText;
 
+    const hint = document.createElement('small');
+    hint.className = '_nospam_ext_hint';
+    hint.textContent = hintText;
+
     label.appendChild(input);
     label.appendChild(span);
     section.appendChild(label);
+    section.appendChild(hint);
 
     const getValue = () => {
         return input.checked;
@@ -235,12 +242,20 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
         text: settings.regexList.join('\n')
     })
 
+    const [hide_content_credentials, get_hide_content_credentials] = createCheckBoxSection({
+        labelText: 'Hide Content Credentials',
+        hintText: 'Usually includes posts with AI generated content, but not necessarily',
+        checked: settings.hideContentCredentials
+    })
+
     const [debug_mode_section, get_debug_mode] = createCheckBoxSection({
-        labelText: 'Debug Mode (highlight instead of remove)',
+        labelText: 'Debug Mode',
+        hintText: 'Highlights posts instead of removing them',
         checked: settings.debugMode
     })
 
     sections.appendChild(regex_input_section);
+    sections.appendChild(hide_content_credentials);
     sections.appendChild(debug_mode_section);
 
     const save_btn_elem         = wrapper.querySelector('#save-btn')!;
@@ -258,6 +273,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
 
     save_btn_elem.addEventListener('click', () => {
         const regexInput = get_regex_text();
+        const hideContentCredentials = get_hide_content_credentials();
         const debugMode = get_debug_mode();
 
         // Parse regex list
@@ -267,7 +283,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
             .filter(line => line.length > 0);
 
         // Apply settings
-        applySettings({ regexList, debugMode });
+        applySettings({ regexList, hideContentCredentials, debugMode });
 
         host.remove();
     });
