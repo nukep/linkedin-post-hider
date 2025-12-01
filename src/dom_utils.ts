@@ -40,11 +40,16 @@ export function getElementText(element: Element): string {
     }
     if (isElementPost(element)) {
         // Post
-        const elem = element.querySelector('.break-words');
-        if (!elem) {
-            return '';
+
+        // Concatenate all text in these elements.
+        // It includes content in reposts.
+        const elems = element.querySelectorAll('.break-words');
+        let text = '';
+        for (const elem of elems) {
+            text += '\n';
+            text += elem.textContent;
         }
-        return elem.textContent;
+        return text;
     }
 
     return '';
