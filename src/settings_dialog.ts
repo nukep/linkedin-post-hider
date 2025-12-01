@@ -248,6 +248,12 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
         text: settings.regexList.join('\n')
     })
 
+    const [hide_suggested_section, get_hide_suggested] = createCheckBoxSection({
+        labelText: 'Hide Suggested Posts',
+        hintText: '',
+        checked: settings.hideSuggested
+    })
+
     const [hide_content_credentials, get_hide_content_credentials] = createCheckBoxSection({
         labelText: 'Hide Content Credentials',
         hintText: 'Usually includes posts with AI generated content, but not necessarily',
@@ -261,6 +267,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
     })
 
     sections.appendChild(regex_input_section);
+    sections.appendChild(hide_suggested_section);
     sections.appendChild(hide_content_credentials);
     sections.appendChild(highlight_mode_section);
 
@@ -279,6 +286,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
 
     save_btn_elem.addEventListener('click', () => {
         const regexInput = get_regex_text();
+        const hideSuggested = get_hide_suggested();
         const hideContentCredentials = get_hide_content_credentials();
         const highlightMode = get_highlight_mode();
 
@@ -289,7 +297,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
             .filter(line => line.length > 0);
 
         // Apply settings
-        applySettings({ regexList, hideContentCredentials, highlightMode });
+        applySettings({ regexList, hideSuggested, hideContentCredentials, highlightMode });
 
         host.remove();
     });

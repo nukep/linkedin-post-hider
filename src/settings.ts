@@ -2,6 +2,7 @@
 // Default settings
 const DEFAULT_SETTINGS : Settings = {
     regexList: [],
+    hideSuggested: false,
     hideContentCredentials: false,
     highlightMode: false,
 };

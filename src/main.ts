@@ -76,6 +76,12 @@ function shouldRemove(element, settings: Settings, regexList: RegexItem[]) {
         }
     }
 
+    if (settings.hideSuggested) {
+        if (DomUtils.isElementSuggested(element)) {
+            return true;
+        }
+    }
+
     const text = DomUtils.getElementText(element);
     for (const { allow, regex } of regexList) {
         if (regex.test(text)) {

@@ -14,6 +14,18 @@ export function doesElementContainContentCredentials(element: Element): boolean 
     return element.querySelectorAll('#content-credentials').length > 0;
 }
 
+export function isElementSuggested(element: Element): boolean {
+    // Get the elements that indicate why the post is on your feed, if any
+    const elems = element.querySelectorAll('.update-components-header');
+
+    for (const elem of elems) {
+        if (elem.textContent.includes('Suggested')) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function queryAllElements(root: HTMLElement | null = null): NodeListOf<HTMLElement> {
     if (!root) {
         root = window.document.body;
