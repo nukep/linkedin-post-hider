@@ -1,7 +1,7 @@
 
 // Default settings
 const DEFAULT_SETTINGS : Settings = {
-    regexList: [],
+    filterPatterns: '',
     hideSuggested: false,
     hideContentCredentials: false,
     highlightMode: false,

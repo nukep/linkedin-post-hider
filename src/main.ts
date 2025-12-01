@@ -25,7 +25,11 @@ interface RegexItem {
 }
 
 // Convert string representations to actual RegExp objects
-function parseRegexList(regexStringArray: string[]): RegexItem[] {
+function parseRegexList(filterPatterns: string): RegexItem[] {
+    const regexStringArray = filterPatterns.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
     return regexStringArray.map(str => {
         // If the string starts with !, allow it
         let allow = false;
@@ -53,14 +57,14 @@ function parseRegexList(regexStringArray: string[]): RegexItem[] {
 }
 
 function buildGetRegexList(): () => RegexItem[] {
-    let lastRegexStringArray = [];
+    let lastFilterPatterns = '';
     let lastResult: RegexItem[] = [];
 
     return () => {
-        const regexStringArray = loadSettings().regexList;
-        if (lastRegexStringArray != regexStringArray) {
-            lastRegexStringArray = regexStringArray;
-            lastResult = parseRegexList(regexStringArray);
+        const filterPatterns = loadSettings().filterPatterns;
+        if (lastFilterPatterns != filterPatterns) {
+            lastFilterPatterns = filterPatterns;
+            lastResult = parseRegexList(lastFilterPatterns);
         }
         return lastResult;
     };

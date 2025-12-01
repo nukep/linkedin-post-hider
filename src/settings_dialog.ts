@@ -32,6 +32,7 @@ function createTextAreaSection({
     const textarea = document.createElement('textarea');
     textarea.className = '_nospam_ext_textarea';
     textarea.placeholder = placeholderText;
+    textarea.spellcheck = false;
     textarea.textContent = text;
 
     section.appendChild(label);
@@ -239,13 +240,14 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
 
     const sections = wrapper.querySelector('#sections')!;
 
-    const [regex_input_section, get_regex_text] = createTextAreaSection({
+    const [filter_patterns_section, get_filter_patterns] = createTextAreaSection({
         labelText: 'Filter Patterns (one per line):',
         placeholderText: 'AI\n/\\bsynerg(y|ize|ise)/i\nhustle\nhack:',
-        hintText: 'Use /pattern/flags format (e.g., /\\bfoo.*?bar\\b/i) or plain text.\n' +
+        hintText: 'Use plain text to match words, or /pattern/flags regular expression format.\n' +
+            'Regular expression example: /\\bTop [0-9]+/i\n' +
             'Start with ! to explicitly allow post and to ignore future patterns.\n' +
             'Patterns are evaluated first to last.',
-        text: settings.regexList.join('\n')
+        text: settings.filterPatterns
     })
 
     const [hide_suggested_section, get_hide_suggested] = createCheckBoxSection({
@@ -266,7 +268,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
         checked: settings.highlightMode
     })
 
-    sections.appendChild(regex_input_section);
+    sections.appendChild(filter_patterns_section);
     sections.appendChild(hide_suggested_section);
     sections.appendChild(hide_content_credentials);
     sections.appendChild(highlight_mode_section);
@@ -285,19 +287,13 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
     });
 
     save_btn_elem.addEventListener('click', () => {
-        const regexInput = get_regex_text();
+        const filterPatterns = get_filter_patterns();
         const hideSuggested = get_hide_suggested();
         const hideContentCredentials = get_hide_content_credentials();
         const highlightMode = get_highlight_mode();
 
-        // Parse regex list
-        const regexList = regexInput
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
-
         // Apply settings
-        applySettings({ regexList, hideSuggested, hideContentCredentials, highlightMode });
+        applySettings({ filterPatterns, hideSuggested, hideContentCredentials, highlightMode });
 
         host.remove();
     });

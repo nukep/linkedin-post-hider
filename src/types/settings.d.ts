@@ -1,5 +1,5 @@
 interface Settings {
-    regexList: string[];
+    filterPatterns: string;
     hideSuggested: boolean;
     hideContentCredentials: boolean;
     highlightMode: boolean;
