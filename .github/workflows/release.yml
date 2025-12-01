@@ -78,5 +78,6 @@ jobs:
         with:
           tag_name: ${{ steps.create_tag.outputs.tag }}
           files: dist/linkedin_post_hider.user.js
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
