@@ -1,9 +1,9 @@
 import { createDialogShadowDom } from './settings_dialog'
-
 import { loadSettings, saveSettings } from './settings';
-
 import * as DomUtils from './dom_utils';
 
+const HIGHLIGHT_BG_COLOR = '#7742e0';
+const HIGHLIGHT_FG_COLOR = '#ffffff';
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -26,9 +26,12 @@ interface RegexItem {
 
 // Convert string representations to actual RegExp objects
 function parseRegexList(filterPatterns: string): RegexItem[] {
+    // Split the pattern into a list of strings.
+    // Remove empty lines and comments.
     const regexStringArray = filterPatterns.split('\n')
         .map(line => line.trim())
-        .filter(line => line.length > 0);
+        .filter(line => line.length > 0)
+        .filter(line => line[0] != '#');
 
     return regexStringArray.map(str => {
         // If the string starts with !, allow it
@@ -109,13 +112,14 @@ function filterElements() {
         if (shouldRemove(element, settings, regexList)) {
             if (highlightMode) {
                 if (!element.dataset.filtered) {
-                    const highlightNode = document.createElement('div');
-                    highlightNode.textContent = 'Matched';
-                    highlightNode.style.backgroundColor = '#ff00ff';
-                    highlightNode.style.textAlign = 'center';
-                    element.prepend(highlightNode);
+                    // const highlightNode = document.createElement('div');
+                    // highlightNode.textContent = 'Matched';
+                    // highlightNode.style.color = HIGHLIGHT_FG_COLOR;
+                    // highlightNode.style.backgroundColor = HIGHLIGHT_BG_COLOR;
+                    // highlightNode.style.textAlign = 'center';
+                    // element.prepend(highlightNode);
 
-                    element.style.setProperty('border', '#f0f 5px solid', 'important');
+                    element.style.setProperty('border', `${HIGHLIGHT_BG_COLOR} 5px solid`, 'important');
 
                     element.dataset.filtered = 'true';
                     processed++;

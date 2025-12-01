@@ -1,14 +1,14 @@
 interface TextAreaSectionParams {
     labelText: string;
     placeholderText: string;
-    hintText: string;
+    hintHtml: string[];
     text: string;
 }
 
 interface CheckBoxSectionParams {
     checked: boolean;
     labelText: string;
-    hintText: string;
+    hintHtml: string[];
 }
 
 interface DialogParams {
@@ -19,7 +19,7 @@ interface DialogParams {
 function createTextAreaSection({
     labelText,
     placeholderText,
-    hintText,
+    hintHtml,
     text
 }: TextAreaSectionParams): [HTMLElement, () => string] {
     const section = document.createElement('div');
@@ -38,10 +38,10 @@ function createTextAreaSection({
     section.appendChild(label);
     section.appendChild(textarea);
 
-    for (const hintLine of hintText.split('\n')) {
+    for (const hintLine of hintHtml) {
         const hint = document.createElement('small');
         hint.className = '_nospam_ext_hint';
-        hint.textContent = hintLine;
+        hint.innerHTML = hintLine;
         section.appendChild(hint);
     }
 
@@ -55,7 +55,7 @@ function createTextAreaSection({
 function createCheckBoxSection({
     checked,
     labelText,
-    hintText
+    hintHtml,
 }: CheckBoxSectionParams): [HTMLElement, () => boolean] {
     const section = document.createElement('div');
     section.className = '_nospam_ext_section';
@@ -76,10 +76,10 @@ function createCheckBoxSection({
     label.appendChild(span);
     section.appendChild(label);
 
-    for (const hintLine of hintText.split('\n')) {
+    for (const hintLine of hintHtml) {
         const hint = document.createElement('small');
         hint.className = '_nospam_ext_hint';
-        hint.textContent = hintLine;
+        hint.innerHTML = hintLine;
         section.appendChild(hint);
     }
 
@@ -242,29 +242,32 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
 
     const [filter_patterns_section, get_filter_patterns] = createTextAreaSection({
         labelText: 'Filter Patterns (one per line):',
-        placeholderText: 'AI\n/\\bsynerg(y|ize|ise)/i\nhustle\nhack:',
-        hintText: 'Use plain text to match words, or /pattern/flags regular expression format.\n' +
-            'Regular expression example: /\\bTop [0-9]+/i\n' +
-            'Start with ! to explicitly allow post and to ignore future patterns.\n' +
-            'Patterns are evaluated first to last.',
+        placeholderText: '# This is a comment\n\nAI\n/\\bTop [0-9]+/i\n/\synerg(y|ize|ise)/i\nhustle\nhack:',
+        hintHtml: [
+            'Use plain text to match words, or /pattern/flags regular expression format.',
+            'Tip: Test regular expressions here: <a href="https://regex101.com/" target="_blank">https://regex101.com/</a>',
+            'Start with ! to explicitly allow post and to ignore future patterns.',
+            'Comments start with "#".',
+            'Patterns are evaluated first to last.'
+        ],
         text: settings.filterPatterns
     })
 
     const [hide_suggested_section, get_hide_suggested] = createCheckBoxSection({
         labelText: 'Hide Suggested Posts',
-        hintText: '',
+        hintHtml: [],
         checked: settings.hideSuggested
     })
 
     const [hide_content_credentials, get_hide_content_credentials] = createCheckBoxSection({
         labelText: 'Hide Content Credentials',
-        hintText: 'Usually includes posts with AI generated content, but not necessarily',
+        hintHtml: ['Usually includes posts with AI generated content, but not necessarily'],
         checked: settings.hideContentCredentials
     })
 
     const [highlight_mode_section, get_highlight_mode] = createCheckBoxSection({
         labelText: 'Highlight Mode',
-        hintText: 'Highlights posts instead of removing them',
+        hintHtml: ['Highlights posts instead of removing them'],
         checked: settings.highlightMode
     })
 
