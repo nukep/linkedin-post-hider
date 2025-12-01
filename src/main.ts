@@ -140,9 +140,9 @@ const observer = new MutationObserver((mutations) => {
 
     for (const mutation of mutations) {
         for (const node of mutation.addedNodes) {
-            // TODO - replace hard-coded number
-            if (node.nodeType === 1) {
-                if (DomUtils.isElementAMatch(node)) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const elem = node as HTMLElement;
+                if (DomUtils.isElementAMatch(elem)) {
                     shouldFilter = true;
                     break;
                 }
