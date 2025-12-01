@@ -1,10 +1,26 @@
+interface TextAreaSectionParams {
+    labelText: string;
+    placeholderText: string;
+    hintText: string;
+    text: string;
+}
+
+interface CheckBoxSectionParams {
+    checked: boolean;
+    labelText: string;
+}
+
+interface DialogParams {
+    settings: Settings;
+    applySettings: (settings: Settings) => void;
+}
 
 function createTextAreaSection({
     labelText,
     placeholderText,
     hintText,
     text
-}) {
+}: TextAreaSectionParams): [HTMLElement, () => string] {
     const section = document.createElement('div');
     section.className = '_nospam_ext_section';
 
@@ -35,7 +51,7 @@ function createTextAreaSection({
 function createCheckBoxSection({
     checked = false,
     labelText
-}) {
+}: CheckBoxSectionParams): [HTMLElement, () => boolean] {
     const section = document.createElement('div');
     section.className = '_nospam_ext_section';
 
@@ -177,7 +193,7 @@ const STYLESHEET = `
 `;
 
 // Create settings UI
-export function createDialogShadowDom({ settings, applySettings }) {
+export function createDialogShadowDom({ settings, applySettings }: DialogParams): HTMLElement {
     // Create host element
     const host = document.createElement('div');
     host.id = 'linkedin-filter-shadow-host';
@@ -210,7 +226,7 @@ export function createDialogShadowDom({ settings, applySettings }) {
     // Insert CSS + HTML into shadow
     shadow.append(style, wrapper);
 
-    const sections = wrapper.querySelector('#sections');
+    const sections = wrapper.querySelector('#sections')!;
 
     const [regex_input_section, get_regex_text] = createTextAreaSection({
         labelText: 'Filter Patterns (one per line):',
@@ -227,9 +243,9 @@ export function createDialogShadowDom({ settings, applySettings }) {
     sections.appendChild(regex_input_section);
     sections.appendChild(debug_mode_section);
 
-    const save_btn_elem         = wrapper.querySelector('#save-btn');
-    const cancel_btn_elem       = wrapper.querySelector('#cancel-btn');
-    const model_bg_overlay_elem = wrapper.querySelector('#modal-bg-overlay');
+    const save_btn_elem         = wrapper.querySelector('#save-btn')!;
+    const cancel_btn_elem       = wrapper.querySelector('#cancel-btn')!;
+    const model_bg_overlay_elem = wrapper.querySelector('#modal-bg-overlay')!;
 
     // Remove the dialog on cancel or overlay click
 

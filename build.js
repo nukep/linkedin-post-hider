@@ -17,7 +17,7 @@ const metablock = `// ==UserScript==
 `;
 
 esbuild.build({
-  entryPoints: ['src/main.mjs'],
+  entryPoints: ['src/main.ts'],
   bundle: true,
   outfile: 'dist/linkedin_userscript.user.js',
   format: 'iife',

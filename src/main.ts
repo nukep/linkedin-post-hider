@@ -1,61 +1,9 @@
-import { createDialogShadowDom } from './settings_dialog.mjs'
+import { createDialogShadowDom } from './settings_dialog'
 
+import { loadSettings, saveSettings } from './settings';
 
-// Default settings
-const DEFAULT_SETTINGS = {
-    regexList: [],
-    debugMode: false
-};
+import * as DomUtils from './dom_utils';
 
-// Load settings from storage
-function loadSettings() {
-    const regexList = GM_getValue('regexList', DEFAULT_SETTINGS.regexList);
-    const debugMode = GM_getValue('debugMode', DEFAULT_SETTINGS.debugMode);
-    return { regexList, debugMode };
-}
-
-// Save settings to storage
-function saveSettings(settings) {
-    GM_setValue('regexList', settings.regexList);
-    GM_setValue('debugMode', settings.debugMode);
-}
-
-function isElementPost(element) {
-    return element.matches('[role="article"]');
-}
-
-function isElementNews(element) {
-    return element.matches('.news-module__storyline');
-}
-
-function isElementAMatch(element) {
-    return isElementPost(element) || isElementNews(element);
-}
-
-function queryAllElements(root=null) {
-    if (!root) {
-        root = document;
-    }
-    return root.querySelectorAll('[role="article"],.news-module__storyline');
-}
-
-
-function getElementText(element) {
-    if (isElementNews(element)) {
-        // LinkedIn News
-        return element.innerText;
-    }
-    if (isElementPost(element)) {
-        // Post
-        const elem = element.querySelector('.break-words');
-        if (!elem) {
-            return '';
-        }
-        return elem.innerText;
-    }
-
-    return '';
-}
 
 function escapeRegex(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -101,7 +49,7 @@ const getRegexList = buildGetRegexList();
 
 // Function to check if element should be removed
 function shouldRemove(element) {
-    const text = getElementText(element);
+    const text = DomUtils.getElementText(element);
     for (const regex of getRegexList()) {
         if (regex.test(text)) {
             return true;
@@ -112,7 +60,7 @@ function shouldRemove(element) {
 
 // Function to remove matching posts and other elements
 function filterElements() {
-    const elements = queryAllElements();
+    const elements = DomUtils.queryAllElements();
     let processed = 0;
 
     const debugMode = loadSettings().debugMode;
@@ -194,7 +142,7 @@ const observer = new MutationObserver((mutations) => {
         for (const node of mutation.addedNodes) {
             // TODO - replace hard-coded number
             if (node.nodeType === 1) {
-                if (isElementAMatch(node)) {
+                if (DomUtils.isElementAMatch(node)) {
                     shouldFilter = true;
                     break;
                 }

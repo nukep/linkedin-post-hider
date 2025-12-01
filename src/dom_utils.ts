@@ -1,0 +1,35 @@
+export function isElementPost(element: Element): boolean {
+    return element.matches('[role="article"]');
+}
+
+export function isElementNews(element: Element): boolean {
+    return element.matches('.news-module__storyline');
+}
+
+export function isElementAMatch(element: Element): boolean {
+    return isElementPost(element) || isElementNews(element);
+}
+
+export function queryAllElements(root: HTMLElement | null = null): NodeListOf<HTMLElement> {
+    if (!root) {
+        root = window.document.body;
+    }
+    return root.querySelectorAll('[role="article"],.news-module__storyline');
+}
+
+export function getElementText(element: Element): string {
+    if (isElementNews(element)) {
+        // LinkedIn News
+        return element.textContent;
+    }
+    if (isElementPost(element)) {
+        // Post
+        const elem = element.querySelector('.break-words');
+        if (!elem) {
+            return '';
+        }
+        return elem.textContent;
+    }
+
+    return '';
+}
