@@ -1,5 +1,6 @@
 {
     "devDependencies": {
+        "esbuild": "^0.27.0",
         "happy-dom": "^20.0.11",
         "jsdom": "^27.2.0",
         "typescript": "^5.9.3"
@@ -8,9 +9,6 @@
         "overrides": {
             "parse5": "7.3.0"
         }
-    },
-    "dependencies": {
-        "esbuild": "^0.27.0"
     },
     "scripts": {
         "typecheck": "tsc --noEmit --project tsconfig.json",

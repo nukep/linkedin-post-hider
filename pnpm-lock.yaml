@@ -10,11 +10,10 @@ overrides:
 importers:
 
   .:
-    dependencies:
+    devDependencies:
       esbuild:
         specifier: ^0.27.0
         version: 0.27.0
-    devDependencies:
       happy-dom:
         specifier: ^20.0.11
         version: 20.0.11
