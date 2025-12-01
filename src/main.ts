@@ -19,21 +19,42 @@ function runFilterOnUrl(url) {
     return !url.includes('/feed/update/');
 }
 
+interface RegexItem {
+    allow: boolean,
+    regex: RegExp
+}
+
 // Convert string representations to actual RegExp objects
-function parseRegexList(regexStringArray) {
+function parseRegexList(regexStringArray: string[]): RegexItem[] {
     return regexStringArray.map(str => {
-        const match = str.match(/^\/(.+)\/([gimuy]*)$/);
-        if (match) {
-            return new RegExp(match[1], match[2]);
+        // If the string starts with !, allow it
+        let allow = false;
+        if (str.startsWith('!')) {
+            allow = true;
+            str = str.substring(1);
         }
-        // If not in /pattern/flags format, treat as literal word
-        return regexFromLiteralWord(str);
+
+        const match = str.match(/^\/(.+)\/([gimuy]*)$/);
+
+        let regex: RegExp;
+
+        if (match) {
+            regex = new RegExp(match[1], match[2]);
+        } else {
+            // If not in /pattern/flags format, treat as literal word
+            regex = regexFromLiteralWord(str);
+        }
+
+        return {
+            allow,
+            regex
+        };
     }).filter(Boolean);
 }
 
-function buildGetRegexList() {
+function buildGetRegexList(): () => RegexItem[] {
     let lastRegexStringArray = [];
-    let lastResult = [];
+    let lastResult: RegexItem[] = [];
 
     return () => {
         const regexStringArray = loadSettings().regexList;
@@ -48,7 +69,7 @@ function buildGetRegexList() {
 const getRegexList = buildGetRegexList();
 
 // Function to check if element should be removed
-function shouldRemove(element, settings: Settings) {
+function shouldRemove(element, settings: Settings, regexList: RegexItem[]) {
     if (settings.hideContentCredentials) {
         if (DomUtils.doesElementContainContentCredentials(element)) {
             return true;
@@ -56,9 +77,10 @@ function shouldRemove(element, settings: Settings) {
     }
 
     const text = DomUtils.getElementText(element);
-    for (const regex of getRegexList()) {
+    for (const { allow, regex } of regexList) {
         if (regex.test(text)) {
-            return true;
+            // Exit early on both explicit "allow" and "deny".
+            return !allow;
         }
     }
     return false;
@@ -71,9 +93,10 @@ function filterElements() {
 
     const settings = loadSettings();
     const debugMode = settings.debugMode;
+    const regexList = getRegexList();
 
     elements.forEach(element => {
-        if (shouldRemove(element, settings)) {
+        if (shouldRemove(element, settings, regexList)) {
             if (debugMode) {
                 // Debug mode: highlight the element
                 if (!element.dataset.filtered) {

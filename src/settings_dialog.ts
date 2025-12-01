@@ -34,13 +34,15 @@ function createTextAreaSection({
     textarea.placeholder = placeholderText;
     textarea.textContent = text;
 
-    const hint = document.createElement('small');
-    hint.className = '_nospam_ext_hint';
-    hint.textContent = hintText;
-
     section.appendChild(label);
     section.appendChild(textarea);
-    section.appendChild(hint);
+
+    for (const hintLine of hintText.split('\n')) {
+        const hint = document.createElement('small');
+        hint.className = '_nospam_ext_hint';
+        hint.textContent = hintLine;
+        section.appendChild(hint);
+    }
 
     const getValue = () => {
         return textarea.value;
@@ -69,14 +71,16 @@ function createCheckBoxSection({
     span.className = '_nospam_ext_checkbox_text';
     span.textContent = labelText;
 
-    const hint = document.createElement('small');
-    hint.className = '_nospam_ext_hint';
-    hint.textContent = hintText;
-
     label.appendChild(input);
     label.appendChild(span);
     section.appendChild(label);
-    section.appendChild(hint);
+
+    for (const hintLine of hintText.split('\n')) {
+        const hint = document.createElement('small');
+        hint.className = '_nospam_ext_hint';
+        hint.textContent = hintLine;
+        section.appendChild(hint);
+    }
 
     const getValue = () => {
         return input.checked;
@@ -238,7 +242,9 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
     const [regex_input_section, get_regex_text] = createTextAreaSection({
         labelText: 'Filter Patterns (one per line):',
         placeholderText: 'AI\n/\\bsynerg(y|ize|ise)/i\nhustle\nhack:',
-        hintText: 'Use /pattern/flags format (e.g., /\\bfoo.*?bar\\b/i) or plain text',
+        hintText: 'Use /pattern/flags format (e.g., /\\bfoo.*?bar\\b/i) or plain text.\n' +
+            'Start with ! to explicitly allow post and to ignore future patterns.\n' +
+            'Patterns are evaluated first to last.',
         text: settings.regexList.join('\n')
     })
 
