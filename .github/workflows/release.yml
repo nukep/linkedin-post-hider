@@ -1,3 +1,7 @@
+# Author: Claude Sonnet 4.5 (AI)
+# Prompt 1: Create a github workflow that creates a new tag whenever the "release" branch is updated. The tag should be formatted as "vYY-MM-DD.n", where YY-MM-DD is the current date, and n is auto-incrementing starting with 1.
+# Prompt 2: Create a github workflow that uses pnpm, runs the "build" script in package.json, and creates a new github release using the file "dist/linkedin_post_hider.user.js".
+
 name: Release
 
 permissions:
@@ -5,16 +9,52 @@ permissions:
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - release
 
 jobs:
-  build:
+  create-tag-and-release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate and push tag
+        id: create_tag
+        run: |
+          # Get current date in YY-MM-DD format
+          DATE=$(date +%y-%m-%d)
+          
+          # Get all existing tags for today
+          PREFIX="v${DATE}"
+          EXISTING_TAGS=$(git tag -l "${PREFIX}.*" | sort -V)
+          
+          # Find the next number
+          if [ -z "$EXISTING_TAGS" ]; then
+            # No tags for today, start with 1
+            N=1
+          else
+            # Get the last tag and extract the number
+            LAST_TAG=$(echo "$EXISTING_TAGS" | tail -n 1)
+            LAST_N=$(echo "$LAST_TAG" | sed "s/${PREFIX}\.//")
+            N=$((LAST_N + 1))
+          fi
+          
+          # Create the new tag
+          NEW_TAG="${PREFIX}.${N}"
+          echo "Creating tag: $NEW_TAG"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
+          git push origin "$NEW_TAG"
+          
+          echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Successfully created and pushed tag: $NEW_TAG"
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -27,12 +67,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Run typecheck
+        run: pnpm run typecheck
+
       - name: Run build script
-        run: pnpm run build ${{ github.ref_name }}
+        run: pnpm run build ${{ steps.create_tag.outputs.tag }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.create_tag.outputs.tag }}
           files: dist/linkedin_post_hider.user.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
