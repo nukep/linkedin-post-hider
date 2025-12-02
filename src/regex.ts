@@ -44,18 +44,18 @@ export function parseRegexList(filterPatterns: string): RegexItem[] {
 
         const match = str.match(/^\/(.+)\/([a-z]*)$/);
 
-        const pattern = match[1];
-        let flags = match[2];
-
-        // If no unicode flags are set, add "u".
-        // The user should almost always want this.
-        if (!flags.includes('v') && !flags.includes('u')) {
-            flags += 'u';
-        }
-
         let regex: RegExp | null = null;
 
         if (match) {
+            const pattern = match[1];
+            let flags = match[2];
+
+            // If no unicode flags are set, add "u".
+            // The user should almost always want this.
+            if (!flags.includes('v') && !flags.includes('u')) {
+                flags += 'u';
+            }
+
             try {
                 regex = new RegExp(pattern, flags);
             } catch (e) {
