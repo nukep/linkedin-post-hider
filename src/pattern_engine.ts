@@ -1,9 +1,9 @@
 import { regexFromLiteralWord } from "./regex";
 
-export interface RegexItem {
-    allow: boolean,
-    regex: RegExp
-}
+type Pattern =
+    | { kind: 'allow'; value: Pattern }
+    | { kind: 'regex'; value: RegExp }
+    | { kind: 'block'; value: Pattern[] };
 
 function checkForRegexEnd(line: string): number | null {
     if (line.startsWith('/')) {
@@ -55,8 +55,8 @@ export function stripCommentsForLine(line: string): string {
     return chars.join('');
 }
 
-// Convert string representations to actual RegExp objects
-function parseRegexList(filterPatterns: string): RegexItem[] {
+// Convert string representations to Pattern objects
+function parseRegexList(filterPatterns: string): Pattern {
     // Split the pattern into a list of strings.
     // Remove empty lines and comments.
     const regexStringArray = filterPatterns.split('\n')
@@ -65,7 +65,9 @@ function parseRegexList(filterPatterns: string): RegexItem[] {
         .filter(line => stripCommentsForLine(line))
         .map(line => line.trimEnd());
 
-    return regexStringArray.flatMap(str => {
+    let list: Pattern[] = [];
+
+    for (let str of regexStringArray) {
         // If the string starts with !, allow it
         let allow = false;
         if (str.startsWith('!')) {
@@ -99,13 +101,16 @@ function parseRegexList(filterPatterns: string): RegexItem[] {
         }
 
         if (regex) {
-            return [
-                { allow, regex }
-            ];
-        } else {
-            return [];
+            const regexPattern: Pattern = { kind: 'regex', value: regex };
+            if (allow) {
+                list.push({ kind: 'allow', value: regexPattern });
+            } else {
+                list.push(regexPattern);
+            }
         }
-    });
+    }
+
+    return { kind: 'block', value: list };
 }
 
 function normalizeText(text: string): string {
@@ -121,16 +126,39 @@ function normalizeText(text: string): string {
 }
 
 export class PatternEngine {
-    private regexItems: RegexItem[];
+    private root_pattern: Pattern;
     private settings: Settings;
 
     constructor(filterPatterns: string, settings: Settings) {
-        this.regexItems = parseRegexList(filterPatterns);
+        this.root_pattern = parseRegexList(filterPatterns);
         this.settings = settings;
     }
 
+    // Returns a ternary value:
+    // - true: Explicitly hide
+    // - false: Explicitly show
+    // - null: Inconclusive
+    private evaluatePattern(pattern: Pattern, text: string): boolean | null {
+        if (pattern.kind == 'regex') {
+            // Explicitly hide, or inconclusive
+            return pattern.value.test(text) ? true : null;
+        } else if (pattern.kind == 'allow') {
+            // Explicitly don't hide, or inconclusive
+            const allowResult = this.evaluatePattern(pattern.value, text);
+            return allowResult ? false : null;
+        } else if (pattern.kind == 'block') {
+            for (const p of pattern.value) {
+                const result = this.evaluatePattern(p, text);
+                if (result !== null) {
+                    return result;
+                }
+            }
+            return false;
+        }
+    }
+
     // Function to check if an entry should be hidden
-    shouldHide(element: SocialMediaEntry) {
+    shouldHide(element: SocialMediaEntry): boolean {
         if (this.settings.hideContentCredentials) {
             if (element.containsContentCredentials()) {
                 return true;
@@ -145,12 +173,12 @@ export class PatternEngine {
     
         let text = element.getText();
         text = normalizeText(text);
-        for (const { allow, regex } of this.regexItems) {
-            if (regex.test(text)) {
-                // Exit early on both explicit "allow" and "deny".
-                return !allow;
-            }
+        const result = this.evaluatePattern(this.root_pattern, text);
+
+        // If the result is inconclusive, then don't hide
+        if (result === null) {
+            return false;
         }
-        return false;
+        return result;
     }
 }

@@ -1,6 +1,6 @@
 // Note: Claude Sonnet 4.5 (AI) wrote these tests
 
-import { PatternEngine, RegexItem, stripCommentsForLine } from './pattern_engine';
+import { PatternEngine, stripCommentsForLine } from './pattern_engine';
 
 interface TestCase {
     text: string;
