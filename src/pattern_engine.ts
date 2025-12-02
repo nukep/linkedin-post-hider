@@ -60,9 +60,10 @@ function parseRegexList(filterPatterns: string): RegexItem[] {
     // Split the pattern into a list of strings.
     // Remove empty lines and comments.
     const regexStringArray = filterPatterns.split('\n')
-        .map(line => line.trim())
+        .map(line => line.trimEnd())
         .filter(line => line.length > 0)
-        .filter(line => stripCommentsForLine(line));
+        .filter(line => stripCommentsForLine(line))
+        .map(line => line.trimEnd());
 
     return regexStringArray.flatMap(str => {
         // If the string starts with !, allow it
