@@ -174,9 +174,6 @@ function injectSettingsButton(globalNavElement: HTMLElement) {
         <div class="ivm-image-view-model global-nav__icon-ivm">
           <div class="ivm-view-attr__img-wrapper">
             <li-icon aria-hidden="true" type="bell-fill" class="ivm-view-attr__icon" size="large">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" data-supported-dps="24x24" fill="currentColor" class="mercado-match" width="24" height="24" focusable="false">
-              <path d="${svg_path}"></path>
-              </svg>
             </li-icon>
           </div>
         </div>
@@ -190,6 +187,25 @@ function injectSettingsButton(globalNavElement: HTMLElement) {
     const item = document.createElement('li');
     item.className = 'global-nav__primary-item'
     item.innerHTML = html;
+
+    const icon = item.querySelector('li-icon');
+    
+    // Create SVG element programmatically
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('data-supported-dps', '24x24');
+    svg.setAttribute('fill', 'currentColor');
+    svg.setAttribute('class', 'mercado-match');
+    svg.setAttribute('width', '24');
+    svg.setAttribute('height', '24');
+    svg.setAttribute('focusable', 'false');
+    
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', svg_path);
+    
+    svg.appendChild(path);
+    icon.appendChild(svg);
 
     const itemLink = item.querySelector('a');
     itemLink.addEventListener('click', () => showSettingsDialog());
