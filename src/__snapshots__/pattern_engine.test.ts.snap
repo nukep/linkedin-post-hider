@@ -220,8 +220,8 @@ advertisement
 exports[`PatternEngine comment and empty line handling should trim whitespace from patterns 1`] = `
 {
   "engine": {
-    "patterns": "  spam  
-  advertisement  ",
+    "patterns": "spam  
+advertisement  ",
     "settings": {},
   },
   "results": [

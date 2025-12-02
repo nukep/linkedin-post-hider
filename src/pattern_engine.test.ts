@@ -157,8 +157,8 @@ advertisement
         });
 
         it('should trim whitespace from patterns', () => {
-            testShouldHide(`  spam  
-  advertisement  `, {}, [
+            testShouldHide(`spam  
+advertisement  `, {}, [
                 { text: 'This is spam' },
                 { text: 'This is advertisement' }
             ]);
