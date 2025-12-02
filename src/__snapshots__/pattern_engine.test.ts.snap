@@ -1,0 +1,607 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`PatternEngine allow patterns (! prefix) should allow entries matching patterns with ! prefix 1`] = `
+{
+  "engine": {
+    "patterns": "!important
+spam",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "This is important spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "This is important",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine allow patterns (! prefix) should allow entries matching regex patterns with ! prefix 1`] = `
+{
+  "engine": {
+    "patterns": "!/important.*/
+/spam/",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "spam message",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "important spam message",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "important announcement",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine allow patterns (! prefix) should exit early on first match (allow or deny) 1`] = `
+{
+  "engine": {
+    "patterns": "spam
+!spam",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine basic pattern matching should handle multiple patterns on separate lines 1`] = `
+{
+  "engine": {
+    "patterns": "spam
+advertisement
+promotion",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "Check out this advertisement",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "Special promotion today",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "Normal post",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine basic pattern matching should hide entries matching a simple word pattern 1`] = `
+{
+  "engine": {
+    "patterns": "spam",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam content",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "This is legitimate content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine comment and empty line handling should ignore comment lines starting with # 1`] = `
+{
+  "engine": {
+    "patterns": "# This is a comment
+spam
+# Another comment
+advertisement",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "# This is a comment",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine comment and empty line handling should ignore empty lines 1`] = `
+{
+  "engine": {
+    "patterns": "spam
+
+advertisement
+
+",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is advertisement",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine comment and empty line handling should trim whitespace from patterns 1`] = `
+{
+  "engine": {
+    "patterns": "  spam  
+  advertisement  ",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is advertisement",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine complex scenarios should handle combination of patterns and settings 1`] = `
+{
+  "engine": {
+    "patterns": "!important
+spam
+advertisement",
+    "settings": {
+      "hideContentCredentials": true,
+      "hideSuggested": true,
+    },
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "spam post",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "important spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "advertisement here",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "suggested": true,
+        "text": "normal post",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "hasContentCredentials": true,
+        "text": "normal post",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "normal post",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine complex scenarios should handle empty pattern list 1`] = `
+{
+  "engine": {
+    "patterns": "",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": false,
+      "testCase": {
+        "text": "any content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine complex scenarios should handle pattern list with only comments and empty lines 1`] = `
+{
+  "engine": {
+    "patterns": "# Comment 1
+
+# Comment 2
+
+",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": false,
+      "testCase": {
+        "text": "any content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine complex scenarios should match literal word patterns case-insensitively by default 1`] = `
+{
+  "engine": {
+    "patterns": "spam",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "SPAM",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "Spam",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine complex scenarios should support case-insensitive matching with regex flag 1`] = `
+{
+  "engine": {
+    "patterns": "/spam/i",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "SPAM",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "Spam",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine regex pattern matching should handle invalid regex patterns gracefully 1`] = `
+{
+  "engine": {
+    "patterns": "/[invalid/",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": false,
+      "testCase": {
+        "text": "some text",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine regex pattern matching should support regex flags 1`] = `
+{
+  "engine": {
+    "patterns": "/SPAM/i",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is SPAM",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is SpAm",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine regex pattern matching should support regex patterns with forward slashes 1`] = `
+{
+  "engine": {
+    "patterns": "/sp[ae]m/",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spem",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "This is spim",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine settings integration should hide content with credentials when hideContentCredentials is true 1`] = `
+{
+  "engine": {
+    "patterns": "",
+    "settings": {
+      "hideContentCredentials": true,
+    },
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "hasContentCredentials": true,
+        "text": "Normal content",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "hasContentCredentials": false,
+        "text": "Normal content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine settings integration should hide suggested content when hideSuggested is true 1`] = `
+{
+  "engine": {
+    "patterns": "",
+    "settings": {
+      "hideSuggested": true,
+    },
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "suggested": true,
+        "text": "Normal content",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "suggested": false,
+        "text": "Normal content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine settings integration should not hide content with credentials when hideContentCredentials is false 1`] = `
+{
+  "engine": {
+    "patterns": "",
+    "settings": {
+      "hideContentCredentials": false,
+    },
+  },
+  "results": [
+    {
+      "hide": false,
+      "testCase": {
+        "hasContentCredentials": true,
+        "text": "Normal content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine settings integration should not hide suggested content when hideSuggested is false 1`] = `
+{
+  "engine": {
+    "patterns": "",
+    "settings": {
+      "hideSuggested": false,
+    },
+  },
+  "results": [
+    {
+      "hide": false,
+      "testCase": {
+        "suggested": true,
+        "text": "Normal content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine settings integration should prioritize settings checks over pattern matching 1`] = `
+{
+  "engine": {
+    "patterns": "!allowed",
+    "settings": {
+      "hideSuggested": true,
+    },
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "suggested": true,
+        "text": "This is allowed content",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine text normalization should normalize curly double quotes to straight quotes 1`] = `
+{
+  "engine": {
+    "patterns": ""quoted"",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is “quoted” text",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is "quoted" text",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine text normalization should normalize curly single quotes to straight quotes 1`] = `
+{
+  "engine": {
+    "patterns": "don't",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "don‘t do this",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "don’t do this",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "don't do this",
+      },
+    },
+  ],
+}
+`;
