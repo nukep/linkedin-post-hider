@@ -138,12 +138,12 @@ exports[`PatternEngine basic pattern matching should hide entries matching a sim
 }
 `;
 
-exports[`PatternEngine comment and empty line handling should ignore comment lines starting with # 1`] = `
+exports[`PatternEngine comment and empty line handling should ignore comment lines starting with ; 1`] = `
 {
   "engine": {
-    "patterns": "# This is a comment
+    "patterns": "; This is a comment
 spam
-# Another comment
+; Another comment
 advertisement",
     "settings": {},
   },
@@ -157,7 +157,33 @@ advertisement",
     {
       "hide": false,
       "testCase": {
-        "text": "# This is a comment",
+        "text": "; This is a comment",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine comment and empty line handling should ignore comment lines starting with ; 1`] = `
+{
+  "engine": {
+    "patterns": "; This is a comment
+spam
+; Another comment
+advertisement",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "; This is a comment",
       },
     },
   ],
@@ -289,9 +315,9 @@ exports[`PatternEngine complex scenarios should handle empty pattern list 1`] = 
 exports[`PatternEngine complex scenarios should handle pattern list with only comments and empty lines 1`] = `
 {
   "engine": {
-    "patterns": "# Comment 1
+    "patterns": "; Comment 1
 
-# Comment 2
+; Comment 2
 
 ",
     "settings": {},

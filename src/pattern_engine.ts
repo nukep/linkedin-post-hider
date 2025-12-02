@@ -5,6 +5,45 @@ export interface RegexItem {
     regex: RegExp
 }
 
+function checkForRegexEnd(line: string): number | null {
+    if (line.startsWith('/')) {
+        for (let i = 1; i < line.length; i++) {
+            if (line[i] === '/' && line[i-1] != '\\') {
+                return i;
+            }
+        }
+    }
+
+    return null;
+}
+
+export function stripCommentsForLine(line: string): string {
+    // Remove anything after the semicolon ";" symbol.
+    // Exceptions are:
+    // - If it's in a regular expression: e.g. /;[0-9]+/ or /foo;bar/
+    // - If it's preceded by an escape character: \;
+
+    const regexEnd = checkForRegexEnd(line);
+
+    for (let i = 0; i < line.length; i++) {
+        if (line[i] !== ';') {
+            continue;
+        }
+
+        if (line[i-1] == '\\') {
+            continue;
+        }
+
+        if (regexEnd !== null && i < regexEnd) {
+            continue;
+        }
+
+        return line.slice(0, i).trimEnd();
+    }
+
+    return line;
+}
+
 // Convert string representations to actual RegExp objects
 function parseRegexList(filterPatterns: string): RegexItem[] {
     // Split the pattern into a list of strings.
@@ -12,7 +51,7 @@ function parseRegexList(filterPatterns: string): RegexItem[] {
     const regexStringArray = filterPatterns.split('\n')
         .map(line => line.trim())
         .filter(line => line.length > 0)
-        .filter(line => line[0] != '#');
+        .filter(line => stripCommentsForLine(line));
 
     return regexStringArray.flatMap(str => {
         // If the string starts with !, allow it

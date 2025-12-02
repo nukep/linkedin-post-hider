@@ -135,13 +135,13 @@ spam`, {}, [
     });
 
     describe('comment and empty line handling', () => {
-        it('should ignore comment lines starting with #', () => {
-            testShouldHide(`# This is a comment
+        it('should ignore comment lines starting with ;', () => {
+            testShouldHide(`; This is a comment
 spam
-# Another comment
+; Another comment
 advertisement`, {}, [
                 { text: 'This is spam' },
-                { text: '# This is a comment' }
+                { text: '; This is a comment' }
             ]);
         });
 
@@ -240,9 +240,9 @@ advertisement`, {
         });
 
         it('should handle pattern list with only comments and empty lines', () => {
-            testShouldHide(`# Comment 1
+            testShouldHide(`; Comment 1
 
-# Comment 2
+; Comment 2
 
 `, {}, [
                 { text: 'any content' }
