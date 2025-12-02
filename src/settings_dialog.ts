@@ -1,3 +1,5 @@
+import { createTextEditor } from "./text_editor";
+
 interface TextAreaSectionParams {
     labelText: string;
     placeholderText: string;
@@ -29,14 +31,13 @@ function createTextAreaSection({
     label.className = '_nospam_ext_label';
     label.textContent = labelText;
 
-    const textarea = document.createElement('textarea');
-    textarea.className = '_nospam_ext_textarea';
-    textarea.placeholder = placeholderText;
-    textarea.spellcheck = false;
-    textarea.textContent = text;
+    const text_editor: HTMLTextAreaElement = createTextEditor();
+    text_editor.className = '_nospam_ext_textarea';
+    text_editor.placeholder = placeholderText;
+    text_editor.textContent = text;
 
     section.appendChild(label);
-    section.appendChild(textarea);
+    section.appendChild(text_editor);
 
     for (const hintLine of hintHtml) {
         const hint = document.createElement('small');
@@ -46,7 +47,7 @@ function createTextAreaSection({
     }
 
     const getValue = () => {
-        return textarea.value;
+        return text_editor.value;
     };
 
     return [section, getValue];
