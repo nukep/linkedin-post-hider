@@ -33,6 +33,8 @@ Hide LinkedIn posts from your feed by using keywords and regex patterns. Designe
 </tr>
 </table>
 
+![Screenshot of highlighting feature](docs/screenshot3.png)
+
 ## Installation
 
 **1. Install the TamperMonkey extension**. Follow the instructions on the official website: https://www.tampermonkey.net/
