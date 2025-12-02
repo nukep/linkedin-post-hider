@@ -26,6 +26,18 @@ function buildGetRegexList(): () => RegexItem[] {
 
 const getRegexList = buildGetRegexList();
 
+function normalizeText(text: string): string {
+    // Replace single quote variants
+    text = text.replaceAll('\u2018', '\'');
+    text = text.replaceAll('\u2019', '\'');
+
+    // Replace double quote variants
+    text = text.replaceAll('\u201C', '"');
+    text = text.replaceAll('\u201D', '"');
+
+    return text;
+}
+
 // Function to check if element should be removed
 function shouldRemove(element, settings: Settings, regexList: RegexItem[]) {
     if (settings.hideContentCredentials) {
@@ -40,7 +52,8 @@ function shouldRemove(element, settings: Settings, regexList: RegexItem[]) {
         }
     }
 
-    const text = DomUtils.getElementText(element);
+    let text = DomUtils.getElementText(element);
+    text = normalizeText(text);
     for (const { allow, regex } of regexList) {
         if (regex.test(text)) {
             // Exit early on both explicit "allow" and "deny".
