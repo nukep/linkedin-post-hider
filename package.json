@@ -1,8 +1,11 @@
 {
     "devDependencies": {
+        "@types/jest": "^30.0.0",
         "esbuild": "^0.27.0",
         "happy-dom": "^20.0.11",
+        "jest": "^30.2.0",
         "jsdom": "^27.2.0",
+        "ts-jest": "^29.4.6",
         "typescript": "^5.9.3"
     },
     "pnpm": {
@@ -12,6 +15,8 @@
     },
     "scripts": {
         "typecheck": "tsc --noEmit --project tsconfig.json",
-        "build": "node build.js"
+        "build": "node build.js",
+        "test": "jest",
+        "test:watch": "jest --watch"
     }
 }
