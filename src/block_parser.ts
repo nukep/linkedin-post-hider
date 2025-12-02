@@ -11,7 +11,7 @@ function parseIndentedLinesIntoBlocks(lines: string[]): Block[] {
 }
 */
 
-interface Block {
+export interface Block {
     line: string;
     children: Block[];
 }

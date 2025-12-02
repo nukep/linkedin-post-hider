@@ -1,4 +1,5 @@
 import { regexFromLiteralWord } from "./regex";
+import { parseIndentedLinesIntoBlocks, Block } from "./block_parser";
 
 type Pattern =
     | { kind: 'allow'; value: Pattern }
@@ -61,62 +62,73 @@ export function stripCommentsForLine(line: string): string {
     return chars.join('');
 }
 
+function parseBlock(block: Block): Pattern[] {
+    let str = block.line;
+
+    // If the string starts with !, allow it
+    let allow = false;
+    if (str.startsWith('!')) {
+        allow = true;
+        str = str.substring(1);
+    }
+
+    const match = str.match(/^\/(.+)\/([a-z]*)$/);
+
+    let regex: RegExp | null = null;
+
+    if (match) {
+        const pattern = match[1];
+        let flags = match[2];
+
+        // If no unicode flags are set, add "u".
+        // The user should almost always want this.
+        if (!flags.includes('v') && !flags.includes('u')) {
+            flags += 'u';
+        }
+
+        try {
+            regex = new RegExp(pattern, flags);
+        } catch (e) {
+            // There was a problem making the regex. Ignore that particular pattern.
+            regex = null;
+        }
+    } else {
+        // If not in /pattern/flags format, treat as literal word
+        regex = regexFromLiteralWord(str);
+    }
+
+    if (regex) {
+        const regexPattern: Pattern = { kind: 'regex', value: regex };
+        if (allow) {
+            return [{ kind: 'allow', value: regexPattern }]
+        } else {
+            return [regexPattern]
+        }
+    }
+    return []
+}
+
+function parseBlocks(blocks: Block[]): Pattern {
+    const patterns = blocks.flatMap(parseBlock)
+    return {
+        kind: 'block',
+        value: patterns
+    }
+}
+
 // Convert string representations to Pattern objects
 function parseRegexList(filterPatterns: string): Pattern {
     // Split the pattern into a list of strings.
     // Remove empty lines and comments.
-    const regexStringArray = filterPatterns.split('\n')
+    const lines = filterPatterns.split('\n')
         .map(line => line.trimEnd())
         .filter(line => line.length > 0)
         .filter(line => stripCommentsForLine(line))
         .map(line => line.trimEnd());
+    
+    const blocks = parseIndentedLinesIntoBlocks(lines);
 
-    let list: Pattern[] = [];
-
-    for (let str of regexStringArray) {
-        // If the string starts with !, allow it
-        let allow = false;
-        if (str.startsWith('!')) {
-            allow = true;
-            str = str.substring(1);
-        }
-
-        const match = str.match(/^\/(.+)\/([a-z]*)$/);
-
-        let regex: RegExp | null = null;
-
-        if (match) {
-            const pattern = match[1];
-            let flags = match[2];
-
-            // If no unicode flags are set, add "u".
-            // The user should almost always want this.
-            if (!flags.includes('v') && !flags.includes('u')) {
-                flags += 'u';
-            }
-
-            try {
-                regex = new RegExp(pattern, flags);
-            } catch (e) {
-                // There was a problem making the regex. Ignore that particular pattern.
-                regex = null;
-            }
-        } else {
-            // If not in /pattern/flags format, treat as literal word
-            regex = regexFromLiteralWord(str);
-        }
-
-        if (regex) {
-            const regexPattern: Pattern = { kind: 'regex', value: regex };
-            if (allow) {
-                list.push({ kind: 'allow', value: regexPattern });
-            } else {
-                list.push(regexPattern);
-            }
-        }
-    }
-
-    return { kind: 'block', value: list };
+    return parseBlocks(blocks);
 }
 
 function normalizeText(text: string): string {
