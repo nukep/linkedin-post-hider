@@ -39,8 +39,6 @@ function parseRegexList(filterPatterns: string): RegexItem[] {
             try {
                 regex = new RegExp(pattern, flags);
             } catch (e) {
-                console.error(e);
-
                 // There was a problem making the regex. Ignore that particular pattern.
                 regex = null;
             }
