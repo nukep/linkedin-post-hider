@@ -1,62 +1,13 @@
 import { createDialogShadowDom } from './settings_dialog'
 import { loadSettings, saveSettings } from './settings';
+import { RegexItem, parseRegexList } from './regex';
 import * as DomUtils from './dom_utils';
 
 const HIGHLIGHT_BG_COLOR = '#7742e0';
 const HIGHLIGHT_FG_COLOR = '#ffffff';
 
-function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function regexFromLiteralWord(word) {
-    // Surround with \b to ensure word boundaries.
-    const regex = new RegExp(`\\b${escapeRegex(word)}\\b`, 'i');
-    return regex;
-}
-
 function runFilterOnUrl(url) {
     return !url.includes('/feed/update/');
-}
-
-interface RegexItem {
-    allow: boolean,
-    regex: RegExp
-}
-
-// Convert string representations to actual RegExp objects
-function parseRegexList(filterPatterns: string): RegexItem[] {
-    // Split the pattern into a list of strings.
-    // Remove empty lines and comments.
-    const regexStringArray = filterPatterns.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .filter(line => line[0] != '#');
-
-    return regexStringArray.map(str => {
-        // If the string starts with !, allow it
-        let allow = false;
-        if (str.startsWith('!')) {
-            allow = true;
-            str = str.substring(1);
-        }
-
-        const match = str.match(/^\/(.+)\/([gimuy]*)$/);
-
-        let regex: RegExp;
-
-        if (match) {
-            regex = new RegExp(match[1], match[2]);
-        } else {
-            // If not in /pattern/flags format, treat as literal word
-            regex = regexFromLiteralWord(str);
-        }
-
-        return {
-            allow,
-            regex
-        };
-    }).filter(Boolean);
 }
 
 function buildGetRegexList(): () => RegexItem[] {
