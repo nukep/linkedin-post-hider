@@ -5,6 +5,12 @@ type Pattern =
     | { kind: 'regex'; value: RegExp }
     | { kind: 'block'; value: Pattern[] };
 
+enum EvalResult {
+    Match,
+    Unmatch,
+    Inconclusive
+}
+
 function checkForRegexEnd(line: string): number | null {
     if (line.startsWith('/')) {
         for (let i = 1; i < line.length; i++) {
@@ -134,26 +140,29 @@ export class PatternEngine {
         this.settings = settings;
     }
 
-    // Returns a ternary value:
-    // - true: Explicitly hide
-    // - false: Explicitly show
-    // - null: Inconclusive
-    private evaluatePattern(pattern: Pattern, text: string): boolean | null {
+    private evaluatePattern(pattern: Pattern, text: string): EvalResult {
         if (pattern.kind == 'regex') {
-            // Explicitly hide, or inconclusive
-            return pattern.value.test(text) ? true : null;
+            return pattern.value.test(text) ? EvalResult.Match : EvalResult.Inconclusive;
         } else if (pattern.kind == 'allow') {
-            // Explicitly don't hide, or inconclusive
             const allowResult = this.evaluatePattern(pattern.value, text);
-            return allowResult ? false : null;
+
+            // Negate the result
+            switch (allowResult) {
+                case EvalResult.Match:
+                    return EvalResult.Unmatch;
+                case EvalResult.Unmatch:
+                    return EvalResult.Match;
+                case EvalResult.Inconclusive:
+                    return EvalResult.Inconclusive;
+            }
         } else if (pattern.kind == 'block') {
             for (const p of pattern.value) {
                 const result = this.evaluatePattern(p, text);
-                if (result !== null) {
+                if (result !== EvalResult.Inconclusive) {
                     return result;
                 }
             }
-            return false;
+            return EvalResult.Inconclusive;
         }
     }
 
@@ -176,9 +185,12 @@ export class PatternEngine {
         const result = this.evaluatePattern(this.root_pattern, text);
 
         // If the result is inconclusive, then don't hide
-        if (result === null) {
-            return false;
+        switch (result) {
+            case EvalResult.Unmatch:
+            case EvalResult.Inconclusive:
+                return false;
+            case EvalResult.Match:
+                return true;
         }
-        return result;
     }
 }
