@@ -6,13 +6,32 @@ Hide LinkedIn posts from your feed by using keywords and regex patterns. Designe
 
 ## Screenshots
 
-Settings dialog:
+<table>
+<tr>
+<td>
+
+**Settings dialog**
+
+</td>
+<td>
+
+**Highlighting feature** (note: posts are _hidden_ rather than highlighted by default):
+
+</td>
+</tr>
+<tr>
+<td valign="top">
 
 ![Screenshot of settings dialog](docs/screenshot1.png)
 
-Highlighting feature (note: posts are _hidden_ rather than highlighted by default):
+</td>
+<td valign="top">
 
 ![Screenshot of highlighting feature](docs/screenshot2.png)
+
+</td>
+</tr>
+</table>
 
 ## Installation
 
