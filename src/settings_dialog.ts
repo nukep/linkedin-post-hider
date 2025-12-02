@@ -221,7 +221,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
 <div class="_nospam_ext_modal">
-    <h2 class="_nospam_ext_title">LinkedIn Post Filter Settings</h2>
+    <h2 class="_nospam_ext_title">LinkedIn Post Hider Settings</h2>
 
     <div id="sections"></div>
 
