@@ -242,7 +242,7 @@ export function createDialogShadowDom({ settings, applySettings }: DialogParams)
 
     const [filter_patterns_section, get_filter_patterns] = createTextAreaSection({
         labelText: 'Filter Patterns (one per line):',
-        placeholderText: '# This is a comment\n\nAI\n/\\bTop [0-9]+/i\n/\synerg(y|ize|ise)/i\nhustle\nhack:',
+        placeholderText: '# Sample comment\n\nPhrase To Hide\n/\\bTop [0-9]+/i\n/Synerg(y|ize|ise)/i\nShocking Facts',
         hintHtml: [
             'Use plain text to match words, or /pattern/flags regular expression format.',
             'Tip: Test regular expressions here: <a href="https://regex101.com/" target="_blank">https://regex101.com/</a>',
