@@ -1,7 +1,7 @@
 import { createDialogShadowDom } from './settings_dialog'
 import { loadSettings, saveSettings } from './settings';
-import { RegexItem, parseRegexList } from './regex';
-import * as DomUtils from './dom_utils';
+import { PatternEngine } from './pattern_engine';
+import { isElementAMatch, queryAllEntries } from './linkedin_dom_entry';
 
 const HIGHLIGHT_BG_COLOR = '#7742e0';
 const HIGHLIGHT_FG_COLOR = '#ffffff';
@@ -10,70 +10,36 @@ function runFilterOnUrl(url) {
     return !url.includes('/feed/update/');
 }
 
-function buildGetRegexList(): () => RegexItem[] {
+function buildGetPatternEngine(): () => PatternEngine {
     let lastFilterPatterns = '';
-    let lastResult: RegexItem[] = [];
+    let lastResult: PatternEngine | null = null;
 
     return () => {
-        const filterPatterns = loadSettings().filterPatterns;
+        const settings = loadSettings();
+        const filterPatterns = settings.filterPatterns;
         if (lastFilterPatterns != filterPatterns) {
             lastFilterPatterns = filterPatterns;
-            lastResult = parseRegexList(lastFilterPatterns);
+            lastResult = new PatternEngine(filterPatterns, settings);
         }
         return lastResult;
     };
 }
 
-const getRegexList = buildGetRegexList();
-
-function normalizeText(text: string): string {
-    // Replace single quote variants
-    text = text.replaceAll('\u2018', '\'');
-    text = text.replaceAll('\u2019', '\'');
-
-    // Replace double quote variants
-    text = text.replaceAll('\u201C', '"');
-    text = text.replaceAll('\u201D', '"');
-
-    return text;
-}
-
-// Function to check if element should be removed
-function shouldRemove(element, settings: Settings, regexList: RegexItem[]) {
-    if (settings.hideContentCredentials) {
-        if (DomUtils.doesElementContainContentCredentials(element)) {
-            return true;
-        }
-    }
-
-    if (settings.hideSuggested) {
-        if (DomUtils.isElementSuggested(element)) {
-            return true;
-        }
-    }
-
-    let text = DomUtils.getElementText(element);
-    text = normalizeText(text);
-    for (const { allow, regex } of regexList) {
-        if (regex.test(text)) {
-            // Exit early on both explicit "allow" and "deny".
-            return !allow;
-        }
-    }
-    return false;
-}
+const getPatternEngine = buildGetPatternEngine();
 
 // Function to remove matching posts and other elements
 function filterElements() {
-    const elements = DomUtils.queryAllElements();
+    const entries = queryAllEntries(document.body);
     let processed = 0;
 
     const settings = loadSettings();
     const highlightMode = settings.highlightMode;
-    const regexList = getRegexList();
+    const patternEngine = getPatternEngine();
 
-    elements.forEach(element => {
-        if (shouldRemove(element, settings, regexList)) {
+    entries.forEach(entry => {
+        if (patternEngine.shouldHide(entry)) {
+            const element = entry.getHTMLElement();
+
             if (highlightMode) {
                 if (!element.dataset.filtered) {
                     // const highlightNode = document.createElement('div');
@@ -200,7 +166,7 @@ const observer = new MutationObserver((mutations) => {
         for (const node of mutation.addedNodes) {
             if (node.nodeType === Node.ELEMENT_NODE) {
                 const elem = node as HTMLElement;
-                if (DomUtils.isElementAMatch(elem)) {
+                if (isElementAMatch(elem)) {
                     shouldFilter = true;
                     break;
                 }
