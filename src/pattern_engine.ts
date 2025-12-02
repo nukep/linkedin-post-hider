@@ -25,23 +25,34 @@ export function stripCommentsForLine(line: string): string {
 
     const regexEnd = checkForRegexEnd(line);
 
-    for (let i = 0; i < line.length; i++) {
-        if (line[i] !== ';') {
-            continue;
-        }
+    let indicesToRemove: Set<number> = new Set();
 
-        if (line[i-1] == '\\') {
-            continue;
-        }
+    let chars = Array.from(line);
 
+    for (let i = 0; i < chars.length; i++) {
         if (regexEnd !== null && i < regexEnd) {
             continue;
         }
 
-        return line.slice(0, i).trimEnd();
+        if (chars[i] !== ';') {
+            continue;
+        }
+
+        if (chars[i-1] == '\\') {
+            indicesToRemove.add(i-1);
+            continue;
+        }
+
+        chars = chars.slice(0, i);
+        break;
     }
 
-    return line;
+    if (indicesToRemove.size > 0) {
+        // Go ahead and remove the escape characters at the indices
+        chars = chars.filter((_, i) => !indicesToRemove.has(i));
+    }
+
+    return chars.join('');
 }
 
 // Convert string representations to actual RegExp objects

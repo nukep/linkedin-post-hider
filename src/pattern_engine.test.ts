@@ -1,6 +1,6 @@
 // Note: Claude Sonnet 4.5 (AI) wrote these tests
 
-import { PatternEngine, RegexItem } from './pattern_engine';
+import { PatternEngine, RegexItem, stripCommentsForLine } from './pattern_engine';
 
 interface TestCase {
     text: string;
@@ -263,6 +263,80 @@ advertisement`, {
                 { text: 'SPAM' },
                 { text: 'Spam' }
             ]);
+        });
+    });
+
+    describe('stripCommentsForLine', () => {
+        it('should remove comments after semicolon', () => {
+            expect(stripCommentsForLine('pattern; this is a comment')).toBe('pattern');
+        });
+
+        it('should trim trailing whitespace after removing comment', () => {
+            expect(stripCommentsForLine('pattern  ; comment')).toBe('pattern  ');
+        });
+
+        it('should return the line unchanged if no semicolon', () => {
+            expect(stripCommentsForLine('pattern without comment')).toBe('pattern without comment');
+        });
+
+        it('should handle empty string', () => {
+            expect(stripCommentsForLine('')).toBe('');
+        });
+
+        it('should handle line with only semicolon', () => {
+            expect(stripCommentsForLine(';')).toBe('');
+        });
+
+        it('should handle line with only comment', () => {
+            expect(stripCommentsForLine('; just a comment')).toBe('');
+        });
+
+        it('should preserve escaped semicolons', () => {
+            expect(stripCommentsForLine('pattern\\; with escaped; comment')).toBe('pattern; with escaped');
+        });
+
+        it('should preserve multiple escaped semicolons', () => {
+            expect(stripCommentsForLine('foo\\;bar\\;baz; comment')).toBe('foo;bar;baz');
+        });
+
+        it('should preserve semicolons inside regex patterns', () => {
+            expect(stripCommentsForLine('/;[0-9]+/; comment')).toBe('/;[0-9]+/');
+        });
+
+        it('should preserve multiple semicolons inside regex patterns', () => {
+            expect(stripCommentsForLine('/foo;bar;baz/; comment')).toBe('/foo;bar;baz/');
+        });
+
+        it('should handle regex with flags and semicolon inside', () => {
+            expect(stripCommentsForLine('/test;pattern/i; comment')).toBe('/test;pattern/i');
+        });
+
+        it('should handle semicolon after regex pattern', () => {
+            expect(stripCommentsForLine('/pattern/; this is a comment')).toBe('/pattern/');
+        });
+
+        it('should handle escaped backslash before semicolon in regex', () => {
+            expect(stripCommentsForLine('/\\\\;/; comment')).toBe('/\\\\;/');
+        });
+
+        it('should handle line with regex and no comment', () => {
+            expect(stripCommentsForLine('/;+/')).toBe('/;+/');
+        });
+
+        it('should handle non-regex line starting with slash', () => {
+            expect(stripCommentsForLine('/not-a-regex; comment')).toBe('/not-a-regex');
+        });
+
+        it('should handle multiple semicolons outside regex', () => {
+            expect(stripCommentsForLine('pattern; comment; more comment')).toBe('pattern');
+        });
+
+        it('should handle regex followed by text and comment', () => {
+            expect(stripCommentsForLine('/;/ extra text; comment')).toBe('/;/ extra text');
+        });
+
+        it('should handle unicode and emojis', () => {
+            expect(stripCommentsForLine('/;🚨\\;/ éxt\\;ra🚨 text; comment')).toBe('/;🚨\\;/ éxt;ra🚨 text');
         });
     });
 });
