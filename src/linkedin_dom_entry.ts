@@ -33,9 +33,13 @@ export class LinkedInDomEntry implements SocialMediaEntry {
             // It includes content in reposts.
             const elems = this.element.querySelectorAll('.break-words');
             let text = '';
+
+            // Just textContent or innerText isn't good enough,
+            // because they ignore whitespace between adjacent elements within.
+
             for (const elem of elems) {
-                text += '\n';
-                text += elem.textContent;
+                text += '\n'
+                text += getAllElementText(elem as HTMLElement)
             }
             return text;
         }
@@ -99,6 +103,29 @@ export class LinkedInDomEntry implements SocialMediaEntry {
     getHTMLElement(): HTMLElement {
         return this.element;
     }
+}
+
+// Mostly written by ChatGPT
+function getAllElementText(elem: HTMLElement): string {
+    const parts = [];
+
+    const walker = elem.ownerDocument.createTreeWalker(
+        elem,
+        NodeFilter.SHOW_TEXT,
+        {
+            acceptNode(node) {
+                const t = node.textContent.trim();
+                return t ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+            }
+        }
+    );
+
+    let n;
+    while ((n = walker.nextNode())) {
+        parts.push(n.textContent.trim());
+    }
+
+    return parts.join(' ')
 }
 
 export function isElementPost(element: Element): boolean {

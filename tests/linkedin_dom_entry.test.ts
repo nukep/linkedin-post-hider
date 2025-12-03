@@ -41,6 +41,17 @@ describe('LinkedInDomEntry', () => {
                 dom = new JSDOM(html);
                 const root = dom.window.document.documentElement as unknown as HTMLElement;
                 entries = queryAllEntries(root);
+
+                // Hack!
+                // NodeFilter is available in browsers, but not Node.js.
+                // Some DOM logic uses it.
+                // @ts-ignore
+                global['NodeFilter'] = {
+                    FILTER_ACCEPT: 1,
+                    FILTER_REJECT: 2,
+                    FILTER_SKIP: 3,
+                    SHOW_TEXT: 4
+                }
             });
 
             test('should parse and snapshot all entries', () => {
