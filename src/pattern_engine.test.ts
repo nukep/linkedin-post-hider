@@ -27,6 +27,14 @@ class MockSocialMediaEntry implements SocialMediaEntry {
         return this.testCase.hasContentCredentials ?? false;
     }
 
+    getPostedByName(): string | null {
+        throw new Error('Unimplemented');
+    }
+
+    getUpdateReason(): string | null {
+        throw new Error('Unimplemented');
+    }
+
     getReactedByName(): string | null {
         return this.testCase.reactedByName;
     }

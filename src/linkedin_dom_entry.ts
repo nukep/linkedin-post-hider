@@ -43,6 +43,59 @@ export class LinkedInDomEntry implements SocialMediaEntry {
         return '';
     }
 
+    getPostedByName(): string | null {
+        if (isElementPost(this.element)) {
+            // Post
+            // Get the elements that indicate the poster, if any
+            // This selector is a bit busy, unfortunately...
+            const elems = this.element.querySelectorAll('.update-components-actor__meta .update-components-actor__title span.visually-hidden');
+
+            // Just the first element
+            // There are usually other elements, but they're not the name
+            for (const elem of elems) {
+                return elem.textContent.trim();
+            }
+        }
+        return null;
+    }
+
+    getUpdateReason(): string | null {
+        if (isElementPost(this.element)) {
+            // Post
+            // Get the elements that indicate why the post is on your feed, if any
+            const elems = this.element.querySelectorAll('.update-components-header');
+
+            let text = ''
+            for (const elem of elems) {
+                text += elem.textContent.trim();
+            }
+            if (text == '') {
+                return null;
+            }
+            return text;
+        }
+        return null;
+    }
+
+    getReactedByName(): string | null {
+        if (isElementPost(this.element)) {
+            // Post
+            // Get the elements that indicate why the post is on your feed, if any
+            // From there, get hyperlinks to profiles
+            const elems = this.element.querySelectorAll('.update-components-header a');
+
+            // The first profile link with text in it is the reacter
+            for (const elem of elems) {
+                const a = elem as HTMLAnchorElement;
+                const text = a.textContent.trim();
+                if (text != '' && a.href.includes('/in/')) {
+                    return text
+                }
+            }
+        }
+        return null;
+    }
+
     getHTMLElement(): HTMLElement {
         return this.element;
     }
