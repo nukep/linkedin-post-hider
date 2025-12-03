@@ -1,5 +1,111 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
+exports[`PatternEngine $react should work with full words 1`] = `
+{
+  "engine": {
+    "patterns": "!$react John
+spam
+",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": false,
+      "testCase": {
+        "reactedByName": "John Doe",
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "reactedByName": "John Doe",
+        "text": "This is fine",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "reactedByName": "Mary Sue",
+        "text": "This is also spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "reactedByName": "Mary Sue",
+        "text": "This is also fine",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is also also spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "This is also also fine",
+      },
+    },
+  ],
+}
+`;
+
+exports[`PatternEngine $react should work with regex 1`] = `
+{
+  "engine": {
+    "patterns": "!$react /u/i
+spam
+",
+    "settings": {},
+  },
+  "results": [
+    {
+      "hide": true,
+      "testCase": {
+        "reactedByName": "John Doe",
+        "text": "This is spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "reactedByName": "John Doe",
+        "text": "This is fine",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "reactedByName": "Mary Sue",
+        "text": "This is also spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "reactedByName": "Mary Sue",
+        "text": "This is also fine",
+      },
+    },
+    {
+      "hide": true,
+      "testCase": {
+        "text": "This is also also spam",
+      },
+    },
+    {
+      "hide": false,
+      "testCase": {
+        "text": "This is also also fine",
+      },
+    },
+  ],
+}
+`;
+
 exports[`PatternEngine allow patterns (! prefix) should allow entries matching patterns with ! prefix 1`] = `
 {
   "engine": {
@@ -132,32 +238,6 @@ exports[`PatternEngine basic pattern matching should hide entries matching a sim
       "hide": false,
       "testCase": {
         "text": "This is legitimate content",
-      },
-    },
-  ],
-}
-`;
-
-exports[`PatternEngine comment and empty line handling should ignore comment lines starting with ; 1`] = `
-{
-  "engine": {
-    "patterns": "; This is a comment
-spam
-; Another comment
-advertisement",
-    "settings": {},
-  },
-  "results": [
-    {
-      "hide": true,
-      "testCase": {
-        "text": "This is spam",
-      },
-    },
-    {
-      "hide": false,
-      "testCase": {
-        "text": "; This is a comment",
       },
     },
   ],

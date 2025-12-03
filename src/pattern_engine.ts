@@ -4,12 +4,18 @@ import { parseIndentedLinesIntoBlocks, Block } from "./block_parser";
 type Pattern =
     | { kind: 'allow'; value: Pattern }
     | { kind: 'regex'; value: RegExp }
+    // | { kind: 'posted_by_name'; value: RegExp }
+    | { kind: 'reacted_by_name'; value: RegExp }
     | { kind: 'block'; value: Pattern[] };
 
 enum EvalResult {
     Match,
     Unmatch,
     Inconclusive
+}
+
+function assertUnreachable(value: never): never {
+  throw new Error(`Unreachable code reached with value: ${value}`);
 }
 
 function checkForRegexEnd(line: string): number | null {
@@ -72,6 +78,15 @@ function parseBlock(block: Block): Pattern[] {
         str = str.substring(1);
     }
 
+    let reacted_by_name = false;
+
+    // If the string starts with $react, remove it and flag it as such
+    // TODO: make more robust once there's more rules like these
+    if (str.startsWith('$react ')) {
+        str = str.substring('$react '.length).trimStart();
+        reacted_by_name = true;
+    }
+
     const match = str.match(/^\/(.+)\/([a-z]*)$/);
 
     let regex: RegExp | null = null;
@@ -98,11 +113,18 @@ function parseBlock(block: Block): Pattern[] {
     }
 
     if (regex) {
-        const regexPattern: Pattern = { kind: 'regex', value: regex };
-        if (allow) {
-            return [{ kind: 'allow', value: regexPattern }]
+        let pattern: Pattern;
+
+        if (reacted_by_name) {
+            pattern = { kind: 'reacted_by_name', value: regex };
         } else {
-            return [regexPattern]
+            pattern = { kind: 'regex', value: regex };
+        }
+        
+        if (allow) {
+            return [{ kind: 'allow', value: pattern }]
+        } else {
+            return [pattern]
         }
     }
     return []
@@ -152,11 +174,18 @@ export class PatternEngine {
         this.settings = settings;
     }
 
-    private evaluatePattern(pattern: Pattern, text: string): EvalResult {
+    private evaluatePattern(pattern: Pattern, entry: SocialMediaEntry): EvalResult {
         if (pattern.kind == 'regex') {
+            const text = normalizeText(entry.getText())
             return pattern.value.test(text) ? EvalResult.Match : EvalResult.Inconclusive;
+        } else if (pattern.kind == 'reacted_by_name') {
+            const name = entry.getReactedByName()
+            if (name == null) {
+                return EvalResult.Inconclusive;
+            }
+            return pattern.value.test(name) ? EvalResult.Match : EvalResult.Inconclusive;
         } else if (pattern.kind == 'allow') {
-            const allowResult = this.evaluatePattern(pattern.value, text);
+            const allowResult = this.evaluatePattern(pattern.value, entry);
 
             // Negate the result
             switch (allowResult) {
@@ -169,32 +198,31 @@ export class PatternEngine {
             }
         } else if (pattern.kind == 'block') {
             for (const p of pattern.value) {
-                const result = this.evaluatePattern(p, text);
+                const result = this.evaluatePattern(p, entry);
                 if (result !== EvalResult.Inconclusive) {
                     return result;
                 }
             }
             return EvalResult.Inconclusive;
         }
+        assertUnreachable(pattern)
     }
 
     // Function to check if an entry should be hidden
-    shouldHide(element: SocialMediaEntry): boolean {
+    shouldHide(entry: SocialMediaEntry): boolean {
         if (this.settings.hideContentCredentials) {
-            if (element.containsContentCredentials()) {
+            if (entry.containsContentCredentials()) {
                 return true;
             }
         }
     
         if (this.settings.hideSuggested) {
-            if (element.isSuggested()) {
+            if (entry.isSuggested()) {
                 return true;
             }
         }
     
-        let text = element.getText();
-        text = normalizeText(text);
-        const result = this.evaluatePattern(this.root_pattern, text);
+        const result = this.evaluatePattern(this.root_pattern, entry);
 
         // If the result is inconclusive, then don't hide
         switch (result) {

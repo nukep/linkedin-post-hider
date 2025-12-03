@@ -4,6 +4,7 @@ import { PatternEngine, stripCommentsForLine } from './pattern_engine';
 
 interface TestCase {
     text: string;
+    reactedByName?: string;
     suggested?: boolean;
     hasContentCredentials?: boolean;
 }
@@ -24,6 +25,10 @@ class MockSocialMediaEntry implements SocialMediaEntry {
 
     containsContentCredentials(): boolean {
         return this.testCase.hasContentCredentials ?? false;
+    }
+
+    getReactedByName(): string | null {
+        return this.testCase.reactedByName;
     }
 
     getHTMLElement(): HTMLElement {
@@ -265,6 +270,33 @@ advertisement`, {
             ]);
         });
     });
+
+    describe('$react', () => {
+        it('should work with full words', () => {
+            testShouldHide(`!$react John
+spam
+`, {}, [
+                { text: 'This is spam', reactedByName: 'John Doe' },
+                { text: 'This is fine', reactedByName: 'John Doe' },
+                { text: 'This is also spam', reactedByName: 'Mary Sue' },
+                { text: 'This is also fine', reactedByName: 'Mary Sue' },
+                { text: 'This is also also spam' },
+                { text: 'This is also also fine' },
+            ])
+        })
+        it('should work with regex', () => {
+            testShouldHide(`!$react /u/i
+spam
+`, {}, [
+                { text: 'This is spam', reactedByName: 'John Doe' },
+                { text: 'This is fine', reactedByName: 'John Doe' },
+                { text: 'This is also spam', reactedByName: 'Mary Sue' },
+                { text: 'This is also fine', reactedByName: 'Mary Sue' },
+                { text: 'This is also also spam' },
+                { text: 'This is also also fine' },
+            ])
+        })
+    })
 
     describe('stripCommentsForLine', () => {
         it('should remove comments after semicolon', () => {
