@@ -52,11 +52,11 @@ const createSettings = (overrides?: Partial<Settings>): Settings => ({
     ...overrides
 });
 
-function testShouldHide(patterns: string, settings: Partial<Settings>, testCases: TestCase[]) {
+function testShowOrHide(patterns: string, settings: Partial<Settings>, testCases: TestCase[]) {
     const engine = new PatternEngine(patterns, createSettings(settings));
     const results = testCases.map(testCase => ({
         testCase: testCase,
-        hide: engine.shouldHide(new MockSocialMediaEntry(testCase))
+        hide: engine.showOrHide(new MockSocialMediaEntry(testCase))
     }));
     expect({
         engine: { patterns, settings },
@@ -67,14 +67,14 @@ function testShouldHide(patterns: string, settings: Partial<Settings>, testCases
 describe('PatternEngine', () => {
     describe('basic pattern matching', () => {
         it('should hide entries matching a simple word pattern', () => {
-            testShouldHide('spam', {}, [
+            testShowOrHide('spam', {}, [
                 { text: 'This is spam content' },
                 { text: 'This is legitimate content' }
             ]);
         });
 
         it('should handle multiple patterns on separate lines', () => {
-            testShouldHide(`spam
+            testShowOrHide(`spam
 advertisement
 promotion`, {}, [
                 { text: 'This is spam' },
@@ -87,7 +87,7 @@ promotion`, {}, [
 
     describe('regex pattern matching', () => {
         it('should support regex patterns with forward slashes', () => {
-            testShouldHide('/sp[ae]m/', {}, [
+            testShowOrHide('/sp[ae]m/', {}, [
                 { text: 'This is spam' },
                 { text: 'This is spem' },
                 { text: 'This is spim' }
@@ -95,7 +95,7 @@ promotion`, {}, [
         });
 
         it('should support regex flags', () => {
-            testShouldHide('/SPAM/i', {}, [
+            testShowOrHide('/SPAM/i', {}, [
                 { text: 'This is SPAM' },
                 { text: 'This is spam' },
                 { text: 'This is SpAm' }
@@ -107,14 +107,14 @@ promotion`, {}, [
             // The pattern should work with unicode characters
             const entry = new MockSocialMediaEntry({ text: 'Check out this emoji 😀' });
             // Just verify it doesn't throw an error
-            expect(() => engine.shouldHide(entry)).not.toThrow();
+            expect(() => engine.showOrHide(entry)).not.toThrow();
         });
 
         it('should handle invalid regex patterns gracefully', () => {
             // Should not throw, just ignore the invalid pattern
             expect(() => new PatternEngine('/[invalid/', createSettings())).not.toThrow();
             
-            testShouldHide('/[invalid/', {}, [
+            testShowOrHide('/[invalid/', {}, [
                 { text: 'some text' }
             ]);
         });
@@ -122,7 +122,7 @@ promotion`, {}, [
 
     describe('allow patterns (! prefix)', () => {
         it('should allow entries matching patterns with ! prefix', () => {
-            testShouldHide(`!important
+            testShowOrHide(`!important
 spam`, {}, [
                 { text: 'This is spam' },
                 { text: 'This is important spam' },
@@ -131,7 +131,7 @@ spam`, {}, [
         });
 
         it('should allow entries matching regex patterns with ! prefix', () => {
-            testShouldHide(`!/important.*/
+            testShowOrHide(`!/important.*/
 /spam/`, {}, [
                 { text: 'spam message' },
                 { text: 'important spam message' },
@@ -140,7 +140,7 @@ spam`, {}, [
         });
 
         it('should exit early on first match (allow or deny)', () => {
-            testShouldHide(`spam
+            testShowOrHide(`spam
 !spam`, {}, [
                 { text: 'This is spam' }
             ]);
@@ -149,7 +149,7 @@ spam`, {}, [
 
     describe('comment and empty line handling', () => {
         it('should ignore comment lines starting with ;', () => {
-            testShouldHide(`; This is a comment
+            testShowOrHide(`; This is a comment
 spam
 ; Another comment
 advertisement`, {}, [
@@ -159,7 +159,7 @@ advertisement`, {}, [
         });
 
         it('should ignore empty lines', () => {
-            testShouldHide(`spam
+            testShowOrHide(`spam
 
 advertisement
 
@@ -170,7 +170,7 @@ advertisement
         });
 
         it('should trim whitespace from patterns', () => {
-            testShouldHide(`spam  
+            testShowOrHide(`spam  
 advertisement  `, {}, [
                 { text: 'This is spam' },
                 { text: 'This is advertisement' }
@@ -180,7 +180,7 @@ advertisement  `, {}, [
 
     describe('text normalization', () => {
         it('should normalize curly single quotes to straight quotes', () => {
-            testShouldHide("don't", {}, [
+            testShowOrHide("don't", {}, [
                 { text: "don\u2018t do this" },
                 { text: "don\u2019t do this" },
                 { text: "don't do this" }
@@ -188,7 +188,7 @@ advertisement  `, {}, [
         });
 
         it('should normalize curly double quotes to straight quotes', () => {
-            testShouldHide('"quoted"', {}, [
+            testShowOrHide('"quoted"', {}, [
                 { text: 'This is \u201Cquoted\u201D text' },
                 { text: 'This is "quoted" text' }
             ]);
@@ -197,33 +197,33 @@ advertisement  `, {}, [
 
     describe('settings integration', () => {
         it('should hide suggested content when hideSuggested is true', () => {
-            testShouldHide('', { hideSuggested: true }, [
+            testShowOrHide('', { hideSuggested: true }, [
                 { text: 'Normal content', suggested: true },
                 { text: 'Normal content', suggested: false }
             ]);
         });
 
         it('should not hide suggested content when hideSuggested is false', () => {
-            testShouldHide('', { hideSuggested: false }, [
+            testShowOrHide('', { hideSuggested: false }, [
                 { text: 'Normal content', suggested: true }
             ]);
         });
 
         it('should hide content with credentials when hideContentCredentials is true', () => {
-            testShouldHide('', { hideContentCredentials: true }, [
+            testShowOrHide('', { hideContentCredentials: true }, [
                 { text: 'Normal content', hasContentCredentials: true },
                 { text: 'Normal content', hasContentCredentials: false }
             ]);
         });
 
         it('should not hide content with credentials when hideContentCredentials is false', () => {
-            testShouldHide('', { hideContentCredentials: false }, [
+            testShowOrHide('', { hideContentCredentials: false }, [
                 { text: 'Normal content', hasContentCredentials: true }
             ]);
         });
 
         it('should prioritize settings checks over pattern matching', () => {
-            testShouldHide('!allowed', { hideSuggested: true }, [
+            testShowOrHide('!allowed', { hideSuggested: true }, [
                 { text: 'This is allowed content', suggested: true }
             ]);
         });
@@ -231,7 +231,7 @@ advertisement  `, {}, [
 
     describe('complex scenarios', () => {
         it('should handle combination of patterns and settings', () => {
-            testShouldHide(`!important
+            testShowOrHide(`!important
 spam
 advertisement`, { 
                 hideSuggested: true,
@@ -247,13 +247,13 @@ advertisement`, {
         });
 
         it('should handle empty pattern list', () => {
-            testShouldHide('', {}, [
+            testShowOrHide('', {}, [
                 { text: 'any content' }
             ]);
         });
 
         it('should handle pattern list with only comments and empty lines', () => {
-            testShouldHide(`; Comment 1
+            testShowOrHide(`; Comment 1
 
 ; Comment 2
 
@@ -263,7 +263,7 @@ advertisement`, {
         });
 
         it('should match literal word patterns case-insensitively by default', () => {
-            testShouldHide('spam', {}, [
+            testShowOrHide('spam', {}, [
                 { text: 'spam' },
                 { text: 'SPAM' },
                 { text: 'Spam' }
@@ -271,7 +271,7 @@ advertisement`, {
         });
 
         it('should support case-insensitive matching with regex flag', () => {
-            testShouldHide('/spam/i', {}, [
+            testShowOrHide('/spam/i', {}, [
                 { text: 'spam' },
                 { text: 'SPAM' },
                 { text: 'Spam' }
@@ -281,7 +281,7 @@ advertisement`, {
 
     describe('$react', () => {
         it('should work with full words', () => {
-            testShouldHide(`!$react John
+            testShowOrHide(`!$react John
 spam
 `, {}, [
                 { text: 'This is spam', reactedByName: 'John Doe' },
@@ -293,7 +293,7 @@ spam
             ])
         })
         it('should work with regex', () => {
-            testShouldHide(`!$react /u/i
+            testShowOrHide(`!$react /u/i
 spam
 `, {}, [
                 { text: 'This is spam', reactedByName: 'John Doe' },

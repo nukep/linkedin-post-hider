@@ -3,8 +3,10 @@ import { loadSettings, saveSettings } from './settings';
 import { PatternEngine } from './pattern_engine';
 import { isElementAMatch, queryAllEntries } from './linkedin_dom_entry';
 
-const HIGHLIGHT_BG_COLOR = '#7742e0';
-const HIGHLIGHT_FG_COLOR = '#ffffff';
+const HIGHLIGHT_HIDE_BG_COLOR = '#7742e0';
+const HIGHLIGHT_HIDE_FG_COLOR = '#ffffff';
+const HIGHLIGHT_SHOW_BG_COLOR = '#158c31';
+const HIGHLIGHT_SHOW_FG_COLOR = '#ffffff';
 
 function runFilterOnUrl(url) {
     return !url.includes('/feed/update/');
@@ -37,26 +39,47 @@ function filterElements() {
     const patternEngine = getPatternEngine();
 
     entries.forEach(entry => {
-        if (patternEngine.shouldHide(entry)) {
-            const element = entry.getHTMLElement();
+        const result = patternEngine.showOrHide(entry);
+        const element = entry.getHTMLElement();
 
-            if (highlightMode) {
+        if (highlightMode) {
+            if (result.kind == 'hide') {
                 if (!element.dataset.filtered) {
-                    // const highlightNode = document.createElement('div');
-                    // highlightNode.textContent = 'Matched';
-                    // highlightNode.style.color = HIGHLIGHT_FG_COLOR;
-                    // highlightNode.style.backgroundColor = HIGHLIGHT_BG_COLOR;
-                    // highlightNode.style.textAlign = 'center';
-                    // element.prepend(highlightNode);
+                    const reason = result.reason;
+                    const highlightNode = document.createElement('div');
+                    highlightNode.textContent = `Hidden: ${reason}`;
+                    highlightNode.style.color = HIGHLIGHT_HIDE_FG_COLOR;
+                    highlightNode.style.backgroundColor = HIGHLIGHT_HIDE_BG_COLOR;
+                    highlightNode.style.textAlign = 'center';
+                    element.prepend(highlightNode);
 
-                    element.style.setProperty('border', `${HIGHLIGHT_BG_COLOR} 5px solid`, 'important');
+                    element.style.setProperty('border', `${HIGHLIGHT_HIDE_BG_COLOR} 5px solid`, 'important');
 
                     element.dataset.filtered = 'true';
                     processed++;
                 }
-            } else {
+            }
+        } else {
+            if (result.kind == 'hide') {
                 // Normal mode: remove the element
                 element.remove();
+                processed++;
+            }
+        }
+
+        if (result.kind == 'show') {
+            if (!element.dataset.filtered) {
+                const reason = result.reason;
+                const highlightNode = document.createElement('div');
+                highlightNode.textContent = `Show: ${reason}`;
+                highlightNode.style.color = HIGHLIGHT_SHOW_FG_COLOR;
+                highlightNode.style.backgroundColor = HIGHLIGHT_SHOW_BG_COLOR;
+                highlightNode.style.textAlign = 'center';
+                element.prepend(highlightNode);
+
+                element.style.setProperty('border', `${HIGHLIGHT_SHOW_BG_COLOR} 5px solid`, 'important');
+
+                element.dataset.filtered = 'true';
                 processed++;
             }
         }

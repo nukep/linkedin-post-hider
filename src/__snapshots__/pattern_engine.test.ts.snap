@@ -10,41 +10,57 @@ spam
   },
   "results": [
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Reacted by user: John",
+      },
       "testCase": {
         "reactedByName": "John Doe",
         "text": "This is spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Reacted by user: John",
+      },
       "testCase": {
         "reactedByName": "John Doe",
         "text": "This is fine",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "reactedByName": "Mary Sue",
         "text": "This is also spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "reactedByName": "Mary Sue",
         "text": "This is also fine",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is also also spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "This is also also fine",
       },
@@ -63,41 +79,57 @@ spam
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "reactedByName": "John Doe",
         "text": "This is spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "reactedByName": "John Doe",
         "text": "This is fine",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Reacted by user: /u/i",
+      },
       "testCase": {
         "reactedByName": "Mary Sue",
         "text": "This is also spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Reacted by user: /u/i",
+      },
       "testCase": {
         "reactedByName": "Mary Sue",
         "text": "This is also fine",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is also also spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "This is also also fine",
       },
@@ -115,19 +147,28 @@ spam",
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Matches pattern: important",
+      },
       "testCase": {
         "text": "This is important spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Matches pattern: important",
+      },
       "testCase": {
         "text": "This is important",
       },
@@ -145,19 +186,28 @@ exports[`PatternEngine allow patterns (! prefix) should allow entries matching r
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /spam/",
+      },
       "testCase": {
         "text": "spam message",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Matches pattern: /important.*/",
+      },
       "testCase": {
         "text": "important spam message",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Matches pattern: /important.*/",
+      },
       "testCase": {
         "text": "important announcement",
       },
@@ -175,7 +225,10 @@ exports[`PatternEngine allow patterns (! prefix) should exit early on first matc
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is spam",
       },
@@ -194,25 +247,36 @@ promotion",
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: advertisement",
+      },
       "testCase": {
         "text": "Check out this advertisement",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: promotion",
+      },
       "testCase": {
         "text": "Special promotion today",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "Normal post",
       },
@@ -229,13 +293,18 @@ exports[`PatternEngine basic pattern matching should hide entries matching a sim
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is spam content",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "This is legitimate content",
       },
@@ -255,13 +324,18 @@ advertisement",
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is spam",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "; This is a comment",
       },
@@ -282,13 +356,19 @@ advertisement
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: advertisement",
+      },
       "testCase": {
         "text": "This is advertisement",
       },
@@ -306,13 +386,19 @@ advertisement  ",
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "This is spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: advertisement",
+      },
       "testCase": {
         "text": "This is advertisement",
       },
@@ -334,39 +420,56 @@ advertisement",
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "spam post",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "show",
+        "reason": "Matches pattern: important",
+      },
       "testCase": {
         "text": "important spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: advertisement",
+      },
       "testCase": {
         "text": "advertisement here",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Post is suggested",
+      },
       "testCase": {
         "suggested": true,
         "text": "normal post",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Post contains content credentials",
+      },
       "testCase": {
         "hasContentCredentials": true,
         "text": "normal post",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "normal post",
       },
@@ -383,7 +486,9 @@ exports[`PatternEngine complex scenarios should handle empty pattern list 1`] = 
   },
   "results": [
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "any content",
       },
@@ -404,7 +509,9 @@ exports[`PatternEngine complex scenarios should handle pattern list with only co
   },
   "results": [
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "any content",
       },
@@ -421,19 +528,28 @@ exports[`PatternEngine complex scenarios should match literal word patterns case
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "SPAM",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: spam",
+      },
       "testCase": {
         "text": "Spam",
       },
@@ -450,19 +566,28 @@ exports[`PatternEngine complex scenarios should support case-insensitive matchin
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /spam/i",
+      },
       "testCase": {
         "text": "spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /spam/i",
+      },
       "testCase": {
         "text": "SPAM",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /spam/i",
+      },
       "testCase": {
         "text": "Spam",
       },
@@ -479,7 +604,9 @@ exports[`PatternEngine regex pattern matching should handle invalid regex patter
   },
   "results": [
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "some text",
       },
@@ -496,19 +623,28 @@ exports[`PatternEngine regex pattern matching should support regex flags 1`] = `
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /SPAM/i",
+      },
       "testCase": {
         "text": "This is SPAM",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /SPAM/i",
+      },
       "testCase": {
         "text": "This is spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /SPAM/i",
+      },
       "testCase": {
         "text": "This is SpAm",
       },
@@ -525,19 +661,27 @@ exports[`PatternEngine regex pattern matching should support regex patterns with
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /sp[ae]m/",
+      },
       "testCase": {
         "text": "This is spam",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: /sp[ae]m/",
+      },
       "testCase": {
         "text": "This is spem",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "text": "This is spim",
       },
@@ -556,14 +700,19 @@ exports[`PatternEngine settings integration should hide content with credentials
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Post contains content credentials",
+      },
       "testCase": {
         "hasContentCredentials": true,
         "text": "Normal content",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "hasContentCredentials": false,
         "text": "Normal content",
@@ -583,14 +732,19 @@ exports[`PatternEngine settings integration should hide suggested content when h
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Post is suggested",
+      },
       "testCase": {
         "suggested": true,
         "text": "Normal content",
       },
     },
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "suggested": false,
         "text": "Normal content",
@@ -610,7 +764,9 @@ exports[`PatternEngine settings integration should not hide content with credent
   },
   "results": [
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "hasContentCredentials": true,
         "text": "Normal content",
@@ -630,7 +786,9 @@ exports[`PatternEngine settings integration should not hide suggested content wh
   },
   "results": [
     {
-      "hide": false,
+      "hide": {
+        "kind": "nothing",
+      },
       "testCase": {
         "suggested": true,
         "text": "Normal content",
@@ -650,7 +808,10 @@ exports[`PatternEngine settings integration should prioritize settings checks ov
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Post is suggested",
+      },
       "testCase": {
         "suggested": true,
         "text": "This is allowed content",
@@ -668,13 +829,19 @@ exports[`PatternEngine text normalization should normalize curly double quotes t
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: "quoted"",
+      },
       "testCase": {
         "text": "This is “quoted” text",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: "quoted"",
+      },
       "testCase": {
         "text": "This is "quoted" text",
       },
@@ -691,19 +858,28 @@ exports[`PatternEngine text normalization should normalize curly single quotes t
   },
   "results": [
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: don't",
+      },
       "testCase": {
         "text": "don‘t do this",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: don't",
+      },
       "testCase": {
         "text": "don’t do this",
       },
     },
     {
-      "hide": true,
+      "hide": {
+        "kind": "hide",
+        "reason": "Matches pattern: don't",
+      },
       "testCase": {
         "text": "don't do this",
       },

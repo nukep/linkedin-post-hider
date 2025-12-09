@@ -3,16 +3,26 @@ import { parseIndentedLinesIntoBlocks, Block } from "./block_parser";
 
 type Pattern =
     | { kind: 'allow'; value: Pattern }
-    | { kind: 'regex'; value: RegExp }
+    | { kind: 'regex'; value: RegExp, source: string }
     // | { kind: 'posted_by_name'; value: RegExp }
-    | { kind: 'reacted_by_name'; value: RegExp }
+    | { kind: 'reacted_by_name'; value: RegExp, source: string }
     | { kind: 'block'; value: Pattern[] };
 
-enum EvalResult {
+type ShowOrHideResult =
+    | { kind: 'show'; reason: string }
+    | { kind: 'hide'; reason: string }
+    | { kind: 'nothing' };
+
+enum EvalResultKind {
     Match,
     Unmatch,
     Inconclusive
 }
+
+type EvalResult =
+    | { kind: EvalResultKind.Match; reason: string }
+    | { kind: EvalResultKind.Unmatch; reason: string }
+    | { kind: EvalResultKind.Inconclusive };
 
 function assertUnreachable(value: never): never {
   throw new Error(`Unreachable code reached with value: ${value}`);
@@ -116,9 +126,9 @@ function parseBlock(block: Block): Pattern[] {
         let pattern: Pattern;
 
         if (reacted_by_name) {
-            pattern = { kind: 'reacted_by_name', value: regex };
+            pattern = { kind: 'reacted_by_name', value: regex, source: str };
         } else {
-            pattern = { kind: 'regex', value: regex };
+            pattern = { kind: 'regex', value: regex, source: str };
         }
         
         if (allow) {
@@ -177,60 +187,80 @@ export class PatternEngine {
     private evaluatePattern(pattern: Pattern, entry: SocialMediaEntry): EvalResult {
         if (pattern.kind == 'regex') {
             const text = normalizeText(entry.getText())
-            return pattern.value.test(text) ? EvalResult.Match : EvalResult.Inconclusive;
+            if (pattern.value.test(text)) {
+                return {
+                    kind: EvalResultKind.Match,
+                    reason: `Matches pattern: ${pattern.source}`
+                };
+            } else {
+                return { kind: EvalResultKind.Inconclusive };
+            }
         } else if (pattern.kind == 'reacted_by_name') {
             const name = entry.getReactedByName()
             if (name == null) {
-                return EvalResult.Inconclusive;
+                return { kind: EvalResultKind.Inconclusive };
+            } else if (pattern.value.test(name)) {
+                return {
+                    kind: EvalResultKind.Match,
+                    reason: `Reacted by user: ${pattern.source}`
+                };
+            } else {
+                return { kind: EvalResultKind.Inconclusive };
             }
-            return pattern.value.test(name) ? EvalResult.Match : EvalResult.Inconclusive;
         } else if (pattern.kind == 'allow') {
             const allowResult = this.evaluatePattern(pattern.value, entry);
 
             // Negate the result
-            switch (allowResult) {
-                case EvalResult.Match:
-                    return EvalResult.Unmatch;
-                case EvalResult.Unmatch:
-                    return EvalResult.Match;
-                case EvalResult.Inconclusive:
-                    return EvalResult.Inconclusive;
+            switch (allowResult.kind) {
+                case EvalResultKind.Match:
+                    return { kind: EvalResultKind.Unmatch, reason: allowResult.reason };
+                case EvalResultKind.Unmatch:
+                    return { kind: EvalResultKind.Match, reason: allowResult.reason };
+                default:
+                    return allowResult;
             }
         } else if (pattern.kind == 'block') {
             for (const p of pattern.value) {
                 const result = this.evaluatePattern(p, entry);
-                if (result !== EvalResult.Inconclusive) {
+                if (result.kind !== EvalResultKind.Inconclusive) {
                     return result;
                 }
             }
-            return EvalResult.Inconclusive;
+            return { kind: EvalResultKind.Inconclusive };
         }
         assertUnreachable(pattern)
     }
 
     // Function to check if an entry should be hidden
-    shouldHide(entry: SocialMediaEntry): boolean {
+    showOrHide(entry: SocialMediaEntry): ShowOrHideResult {
         if (this.settings.hideContentCredentials) {
             if (entry.containsContentCredentials()) {
-                return true;
+                return {
+                    kind: 'hide',
+                    reason: 'Post contains content credentials'
+                }
             }
         }
     
         if (this.settings.hideSuggested) {
             if (entry.isSuggested()) {
-                return true;
+                return {
+                    kind: 'hide',
+                    reason: 'Post is suggested'
+                }
             }
         }
     
         const result = this.evaluatePattern(this.root_pattern, entry);
 
         // If the result is inconclusive, then don't hide
-        switch (result) {
-            case EvalResult.Unmatch:
-            case EvalResult.Inconclusive:
-                return false;
-            case EvalResult.Match:
-                return true;
+        switch (result.kind) {
+            case EvalResultKind.Match:
+                return { kind: 'hide', reason: result.reason };
+            case EvalResultKind.Unmatch:
+                return { kind: 'show', reason: result.reason };
+            case EvalResultKind.Inconclusive:
+                return { kind: 'nothing' };
         }
     }
 }
