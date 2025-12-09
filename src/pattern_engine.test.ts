@@ -222,7 +222,7 @@ advertisement  `, {}, [
             ]);
         });
 
-        it('should prioritize settings checks over pattern matching', () => {
+        it('should prioritize pattern matching over settings checks', () => {
             testShowOrHide('!allowed', { hideSuggested: true }, [
                 { text: 'This is allowed content', suggested: true }
             ]);

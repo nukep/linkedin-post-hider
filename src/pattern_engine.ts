@@ -233,6 +233,20 @@ export class PatternEngine {
 
     // Function to check if an entry should be hidden
     showOrHide(entry: SocialMediaEntry): ShowOrHideResult {
+        const result = this.evaluatePattern(this.root_pattern, entry);
+
+        // If the result is inconclusive, then don't hide
+        switch (result.kind) {
+            case EvalResultKind.Match:
+                return { kind: 'hide', reason: result.reason };
+            case EvalResultKind.Unmatch:
+                return { kind: 'show', reason: result.reason };
+            case EvalResultKind.Inconclusive:
+                {
+                    // do nothing
+                }
+        }
+
         if (this.settings.hideContentCredentials) {
             if (entry.containsContentCredentials()) {
                 return {
@@ -250,17 +264,7 @@ export class PatternEngine {
                 }
             }
         }
-    
-        const result = this.evaluatePattern(this.root_pattern, entry);
 
-        // If the result is inconclusive, then don't hide
-        switch (result.kind) {
-            case EvalResultKind.Match:
-                return { kind: 'hide', reason: result.reason };
-            case EvalResultKind.Unmatch:
-                return { kind: 'show', reason: result.reason };
-            case EvalResultKind.Inconclusive:
-                return { kind: 'nothing' };
-        }
+        return { kind: 'nothing' };
     }
 }

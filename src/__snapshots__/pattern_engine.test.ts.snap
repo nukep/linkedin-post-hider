@@ -798,7 +798,7 @@ exports[`PatternEngine settings integration should not hide suggested content wh
 }
 `;
 
-exports[`PatternEngine settings integration should prioritize settings checks over pattern matching 1`] = `
+exports[`PatternEngine settings integration should prioritize pattern matching over settings checks 1`] = `
 {
   "engine": {
     "patterns": "!allowed",
@@ -809,8 +809,8 @@ exports[`PatternEngine settings integration should prioritize settings checks ov
   "results": [
     {
       "hide": {
-        "kind": "hide",
-        "reason": "Post is suggested",
+        "kind": "show",
+        "reason": "Matches pattern: allowed",
       },
       "testCase": {
         "suggested": true,
