@@ -1,5 +1,5 @@
 import { createDialogShadowDom } from './settings_dialog'
-import { loadSettings, saveSettings } from './settings';
+import { loadSettings, saveSettings, SettingsMigrationError } from './settings';
 import { PatternEngine } from './pattern_engine';
 import { isElementAMatch, queryAllEntries } from './linkedin_dom_entry';
 
@@ -12,12 +12,40 @@ function runFilterOnUrl(url) {
     return !url.includes('/feed/update/');
 }
 
+function loadSettingsAppSafe(): Settings {
+    try {
+        const settings = loadSettings();
+        return settings;
+    } catch (err) {
+        if (err instanceof SettingsMigrationError) {
+            const WARNING_ELEMENT_ID = '__linked_post_hider_updated';
+            if (!document.getElementById(WARNING_ELEMENT_ID)) {
+                const warningNode = document.createElement('div');
+                warningNode.id = WARNING_ELEMENT_ID;
+                warningNode.textContent = 'LinkedIn Post Hider was updated. Please refresh this page!'
+                warningNode.style.backgroundColor = '#c22';
+                warningNode.style.color = 'white';
+                warningNode.style.position = 'sticky';
+                warningNode.style.top = '0';
+                warningNode.style.left = '0';
+                warningNode.style.right = '0';
+                warningNode.style.textAlign = 'center';
+                warningNode.style.padding = '1em';
+                warningNode.style.zIndex = '1000';
+
+                document.body.prepend(warningNode);
+            }
+        }
+        throw err;
+    }
+}
+
 function buildGetPatternEngine(): () => PatternEngine {
     let lastFilterPatterns = '';
     let lastResult: PatternEngine | null = null;
 
     return () => {
-        const settings = loadSettings();
+        const settings = loadSettingsAppSafe();
         const filterPatterns = settings.filterPatterns;
         if (lastFilterPatterns != filterPatterns) {
             lastFilterPatterns = filterPatterns;
@@ -34,7 +62,7 @@ function filterElements() {
     const entries = queryAllEntries(document.body);
     let processed = 0;
 
-    const settings = loadSettings();
+    const settings = loadSettingsAppSafe();
     const highlightMode = settings.highlightMode;
     const patternEngine = getPatternEngine();
 
@@ -109,7 +137,7 @@ function showSettingsDialog() {
     }
 
     const dialogHost = createDialogShadowDom({
-        settings: loadSettings(),
+        settings: loadSettingsAppSafe(),
         applySettings: applySettings
     });
     document.body.appendChild(dialogHost);
